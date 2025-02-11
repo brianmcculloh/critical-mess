@@ -1,18 +1,34 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu";
-import { ChevronDown, ArrowDownWideNarrow, ArrowUpNarrowWide } from "lucide-react";
-
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "@/components/ui/dropdown-menu";
+import {
+  ChevronDown,
+  ArrowDownWideNarrow,
+  ArrowUpNarrowWide,
+  Check,
+} from "lucide-react";
+import {
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+  TooltipProvider,
+} from "@/components/ui/tooltip";
 
 const SORT_OPTIONS = [
-  { label: "Date Added", value: "created_at" },
+  { label: "Episode", value: "episode" },
   { label: "Movie Year", value: "year" },
   { label: "Movie Title", value: "title" },
-  { label: "Critic Score", value: "critic_rating" },
-  { label: "Audience Score", value: "audience_rating" },
-  { label: "Average User Score", value: "avg_user_rating" },
+  { label: "Tomatometer", value: "critic_rating" },
+  { label: "Popcornmeter", value: "audience_rating" },
+  { label: "Score Gap", value: "disparity" },
+  { label: "User Score", value: "avg_user_rating" },
   { label: "Nick's Score", value: "nick_rating" },
   { label: "Brian's Score", value: "brian_rating" },
   { label: "Gris's Score", value: "gris_rating" },
@@ -25,11 +41,22 @@ const SORT_OPTIONS = [
 
 interface SortingProps {
   onSortChange: (sortKey: string, sortOrder: "asc" | "desc") => void;
+  currentSortKey: string;
+  currentSortOrder: "asc" | "desc";
 }
 
-const Sorting: React.FC<SortingProps> = ({ onSortChange }) => {
-  const [selectedSort, setSelectedSort] = useState<string>("created_at");
-  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
+const Sorting: React.FC<SortingProps> = ({
+  onSortChange,
+  currentSortKey,
+  currentSortOrder,
+}) => {
+  const [selectedSort, setSelectedSort] = useState<string>(currentSortKey);
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">(currentSortOrder);
+
+  useEffect(() => {
+    setSelectedSort(currentSortKey);
+    setSortOrder(currentSortOrder);
+  }, [currentSortKey, currentSortOrder]);
 
   const handleSortChange = (sortKey: string) => {
     setSelectedSort(sortKey);
@@ -43,37 +70,70 @@ const Sorting: React.FC<SortingProps> = ({ onSortChange }) => {
 
   return (
     <div className="flex items-center gap-2">
-      {/* ShadCN-UI Dropdown for Sorting Options */}
+      {/* ✅ Dropdown for Sorting Options */}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="outline" className="flex items-center gap-2 h-10">
-            {SORT_OPTIONS.find(option => option.value === selectedSort)?.label}
+            {SORT_OPTIONS.find((option) => option.value === selectedSort)?.label}
             <ChevronDown className="w-4 h-4 opacity-70" />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent>
           {SORT_OPTIONS.map((option) => (
-            <DropdownMenuItem key={option.value} onClick={() => handleSortChange(option.value)}>
+            <DropdownMenuItem
+              key={option.value}
+              onClick={() => handleSortChange(option.value)}
+              className={`flex items-center justify-between ${
+                selectedSort === option.value
+                  ? "bg-accent text-white font-semibold"
+                  : ""
+              }`}
+            >
               {option.label}
+              {selectedSort === option.value && <Check className="w-4 h-4 ml-2" />}
             </DropdownMenuItem>
           ))}
         </DropdownMenuContent>
       </DropdownMenu>
 
-      {/* Button Group for Sorting Order */}
+      {/* ✅ Sorting Order Controls */}
       <div className="flex border rounded-md overflow-hidden">
-        <Button
-          onClick={() => handleSortOrderChange("desc")}
-          className={sortOrder === "desc" ? "rounded-none bg-accent hover:bg-accent" : "rounded-none bg-background hover:bg-accent"}
-        >
-          <ArrowDownWideNarrow className="w-5 h-5 text-foreground" />
-        </Button>
-        <Button
-          onClick={() => handleSortOrderChange("asc")}
-          className={sortOrder === "asc" ? "rounded-none bg-accent hover:bg-accent" : "rounded-none bg-background hover:bg-accent"}
-        >
-          <ArrowUpNarrowWide className="w-5 h-5 text-foreground" />
-        </Button>
+        <TooltipProvider delayDuration={0}>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                onClick={() => handleSortOrderChange("desc")}
+                className={
+                  sortOrder === "desc"
+                    ? "rounded-none bg-accent hover:bg-accent text-white"
+                    : "rounded-none bg-background hover:bg-accent"
+                }
+              >
+                <ArrowDownWideNarrow className="w-5 h-5 text-foreground" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent className="bg-black">
+              <span>Highest First</span>
+            </TooltipContent>
+          </Tooltip>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                onClick={() => handleSortOrderChange("asc")}
+                className={
+                  sortOrder === "asc"
+                    ? "rounded-none bg-accent hover:bg-accent text-white"
+                    : "rounded-none bg-background hover:bg-accent"
+                }
+              >
+                <ArrowUpNarrowWide className="w-5 h-5 text-foreground" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent className="bg-black">
+              <span>Lowest First</span>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
       </div>
     </div>
   );

@@ -3,27 +3,84 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useRouter } from "next/navigation";
-import MovieSearch from "@/components/MovieSearch";
-import { supabase } from "@/lib/supabaseClient";
-import DeleteMovieModal from "@/components/DeleteMovieModal";
+import MovieSearchDialog from "@/components/MovieSearchDialog";
 import MovieCard from "@/components/MovieCard";
-import Header from "@/components/Header";
+import SuggestedMovies from "@/components/SuggestedMovies";
+import Sorting from "@/components/Sorting";
+import StatusToggle from "@/components/StatusToggle";
 import { fetchMovies } from "@/lib/movieUtils";
+import { Sparkles } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 const AdminPage: React.FC = () => {
-  const { user, loading, logout } = useAuth();
+  const { user, loading } = useAuth();
   const router = useRouter();
-  
   const [movies, setMovies] = useState<any[]>([]);
+  const [filteredMovies, setFilteredMovies] = useState<any[]>([]);
   const [isAddingMovie, setIsAddingMovie] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
+  const [suggestedMoviesRefreshKey, setSuggestedMoviesRefreshKey] = useState(0);
 
-  // ✅ Fetch movies from Supabase
+  // ✅ Sorting and Status state
+  const [sortKey, setSortKey] = useState<string>("episode");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
+  const [viewStatus, setViewStatus] = useState<"episode" | "queue">("episode");
+
+  const refreshMovies = async () => {
+    await fetchMovies(setMovies, setIsAddingMovie);
+  };
+
+  const triggerRefresh = () => {
+    setRefreshKey((prevKey) => prevKey + 1);
+    refreshMovies();
+  };
+
+  const triggerSuggestedMoviesRefresh = () => {
+    setSuggestedMoviesRefreshKey((prevKey) => prevKey + 1);
+  };
+
   useEffect(() => {
     const loadMovies = async () => {
       await fetchMovies(setMovies, setIsAddingMovie);
     };
     loadMovies();
-  }, []);
+  }, [refreshKey]);
+
+  // ✅ Filter + Sort movies based on toggle
+  useEffect(() => {
+    const filtered = movies
+      .filter((movie) => movie.status === viewStatus)
+      .sort((a, b) => {
+        const key = sortKey as keyof typeof a;
+        let valueA: number | string = a[key] ?? 0;
+        let valueB: number | string = b[key] ?? 0;
+
+        if (key === "title") {
+          const titleA = a.title.toLowerCase();
+          const titleB = b.title.toLowerCase();
+          return sortOrder === "asc"
+            ? titleA.localeCompare(titleB)
+            : titleB.localeCompare(titleA);
+        }
+
+        if (key === "created_at") {
+          valueA = a.created_at ? new Date(a.created_at).getTime() : 0;
+          valueB = b.created_at ? new Date(b.created_at).getTime() : 0;
+        }
+
+        const numA = typeof valueA === "number" ? valueA : parseFloat(valueA.toString()) || 0;
+        const numB = typeof valueB === "number" ? valueB : parseFloat(valueB.toString()) || 0;
+
+        return sortOrder === "asc" ? numA - numB : numB - numA;
+      });
+
+    setFilteredMovies(filtered);
+  }, [movies, sortKey, sortOrder, viewStatus]); // ✅ React to viewStatus
+
+  const handleSortChange = (newSortKey: string, newSortOrder: "asc" | "desc") => {
+    setSortKey(newSortKey);
+    setSortOrder(newSortOrder);
+  };
 
   useEffect(() => {
     if (!loading && (!user || !user.isAdmin)) {
@@ -31,46 +88,58 @@ const AdminPage: React.FC = () => {
     }
   }, [user, loading, router]);
 
-  const handleMovieSearchSelect = async () => {
-    console.log("🟡 handleMovieSearchSelect triggered! Setting isAddingMovie = true");
-    setIsAddingMovie(true);
-  };
-
-  const handleDeleteMovie = async () => {
-    // Call fetchMovies with the necessary arguments
-    await fetchMovies(setMovies, setIsAddingMovie);
-  };
-
   return (
-    <div className="p-6">
-      <Header />
-      <MovieSearch
-        onSelectMovie={handleMovieSearchSelect}
-        fetchMovies={() => fetchMovies(setMovies, setIsAddingMovie)}
-        isAdmin={true} // Pass true for admin behavior
-      />
+    <>
+      <div className="flex gap-4 items-center">
+        <MovieSearchDialog
+          fetchMovies={refreshMovies}
+          triggerRefresh={triggerRefresh}
+          triggerSuggestedMoviesRefresh={triggerSuggestedMoviesRefresh}
+          isAdmin={true}
+        />
+        <StatusToggle status={viewStatus} onToggle={setViewStatus} /> {/* ✅ Add Toggle */}
+        <Sorting
+          onSortChange={handleSortChange}
+          currentSortKey={sortKey}
+          currentSortOrder={sortOrder}
+        />
+        <SuggestedMovies refreshKey={refreshKey} />
+        <Button
+          onClick={() => router.push("/insights")}
+          className="transition-colors bg-secondary hover:bg-secondary/70 text-black dark:text-white"
+        >
+          Insights
+          <Sparkles className="transform w-5 h-5" />
+        </Button>
+      </div>
 
-      <h2 className="text-xl font-semibold mt-6">Saved Movies</h2>
-
-      {/* ✅ Wrap movie grid in a relative div for overlay */}
       <div className="relative mt-4">
-        {/* ✅ Disable grid visually when adding a movie */}
         {isAddingMovie && (
           <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center z-10 pointer-events-none">
             <p className="text-white font-semibold">Adding movie...</p>
           </div>
         )}
 
-        <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 transition-opacity ${isAddingMovie ? "opacity-50 pointer-events-none" : "opacity-100"}`}>
-          {movies.map((movie) => (
+        <div
+          className={`grid custom-grid gap-4 transition-opacity ${
+            isAddingMovie ? "opacity-50 pointer-events-none" : "opacity-100"
+          }`}
+        >
+          {filteredMovies.map((movie) => (
             <div key={movie.id} className="relative">
-              <DeleteMovieModal movieId={movie.id} movieTitle={movie.title} onDelete={handleDeleteMovie} />
-              <MovieCard movie={movie} editable={true} isAdmin={true} />
+              <MovieCard
+                movie={movie}
+                editable={true}
+                onDelete={refreshMovies}
+                onEpisodeChange={triggerRefresh} 
+                showDelete={true}
+                triggerSuggestedMoviesRefresh={triggerSuggestedMoviesRefresh}
+              />
             </div>
           ))}
         </div>
       </div>
-    </div>
+    </>
   );
 };
 

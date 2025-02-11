@@ -4,6 +4,7 @@ import { ThemeProvider } from "@/components/ThemeProvider";
 import { AuthProvider } from "@/contexts/AuthContext";
 import "./globals.css";
 import { Rubik } from "next/font/google";
+import Header from "@/components/Header";
 
 const rubik = Rubik({
   subsets: ["latin"],
@@ -38,7 +39,12 @@ export default function RootLayout({
           className={`${geistSans.variable} ${geistMono.variable} antialiased font-sans`}
         >
           <ThemeProvider>
-            <div className="container mx-auto max-w-[1600px] px-4">{children}</div>
+            <div className="container mx-auto max-w-[1600px] px-4">
+              <div className="p-6">
+                <Header />
+                {children}
+              </div>
+            </div>
           </ThemeProvider>
         </body>
       </html>

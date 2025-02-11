@@ -73,3 +73,19 @@ body {
     @apply bg-background text-foreground;
   }
 }
+
+.custom-grid {
+  grid-template-columns: repeat(
+    var(--grid-type, auto-fill),
+    minmax(min(350px, 100%), 1fr)
+  );
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
