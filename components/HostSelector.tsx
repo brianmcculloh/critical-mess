@@ -34,7 +34,6 @@ const HostSelector: React.FC<HostSelectorProps> = ({ movieId, initialSelection, 
 
   useEffect(() => {
     if (!clientId) return;
-
     const fetchSelectedHost = async () => {
       const { data, error } = await supabase
         .from("user_host_votes")
