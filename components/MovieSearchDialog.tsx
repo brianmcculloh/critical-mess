@@ -132,7 +132,7 @@ const MovieSearchDialog: React.FC<MovieSearchDialogProps> = ({
         }
     
         // Insert movie into the correct rank position
-        const { data, error } = await supabase.from("top_hundred_movies").insert([
+        const { error } = await supabase.from("top_hundred_movies").insert([
           {
             title: selectedMovie.title,
             year: selectedMovie.release_date
