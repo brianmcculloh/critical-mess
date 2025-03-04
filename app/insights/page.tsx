@@ -31,31 +31,19 @@ interface HostAnalytics {
   popcornmeter_alignment: number;
   user_alignment: number;
   heat_meter: number;
-  top_5_highest_rated: any[];
-  top_5_lowest_rated: any[];
-  top_5_heat_meter_highest: any[];
-  top_5_heat_meter_lowest: any[];
-}
-
-interface MovieAnalytics {
-  movie_instance_id: string;
-  tomatometer_popcorn_gap: number;
 }
 
 const InsightsPage: React.FC = () => {
   const [hostAnalytics, setHostAnalytics] = useState<HostAnalytics[]>([]);
-  const [movieAnalytics, setMovieAnalytics] = useState<MovieAnalytics[]>([]);
   const [loading, setLoading] = useState(true);
 
   const fetchInsights = async () => {
     setLoading(true);
-    const [hostResponse, movieResponse] = await Promise.all([
+    const [hostResponse] = await Promise.all([
       fetch("/api/insights/hosts").then((res) => res.json()),
-      fetch("/api/insights/movies").then((res) => res.json()),
     ]);
 
     setHostAnalytics(hostResponse);
-    setMovieAnalytics(movieResponse);
     setLoading(false);
   };
 

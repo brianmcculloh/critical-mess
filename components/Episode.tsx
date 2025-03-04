@@ -15,6 +15,26 @@ interface EpisodeProps {
   onStopEditing?: () => void;  // ✅ Added
 }
 
+interface Movie {
+  id: number;
+  title: string;
+  year?: number;
+  poster_url?: string;
+  critic_rating?: number | null;
+  audience_rating?: number | null;
+  user_rating?: number | null;
+  user_selected_host?: string | null;
+  created_at?: string;
+  suggestion_count?: number | null;
+  status?: string;
+  episode?: number | null;
+}
+
+interface UpdateData {
+  episode: number;
+  status: string;
+}
+
 const Episode: React.FC<EpisodeProps> = ({
   movieId,
   initialEpisode,
@@ -96,7 +116,7 @@ const Episode: React.FC<EpisodeProps> = ({
         if (error) {
           console.error("Error checking for duplicate episode:", error);
         } else if (data && data.length > 0) {
-          const duplicateExists = data.some((movie: any) => movie.id !== movieId);
+          const duplicateExists = (data as Movie[]).some((movie) => movie.id !== movieId);
           if (duplicateExists) {
             setShowDuplicateAlert(true);
             setTimeout(() => setShowDuplicateAlert(false), 3000);
@@ -117,7 +137,7 @@ const Episode: React.FC<EpisodeProps> = ({
       }
 
       if (!skipDatabaseSave && movieId) {
-        const updateData: any = { episode: numericValue, status: "episode" };
+        const updateData: UpdateData = { episode: numericValue, status: "episode" };
         if (numericValue === 0) updateData.status = "queue";
       
         const { data: updatedMovie, error: updateError } = await supabase

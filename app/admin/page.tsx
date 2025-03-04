@@ -12,14 +12,29 @@ import { fetchMovies } from "@/lib/movieUtils";
 import { Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
+interface Movie {
+  id: number;
+  title: string;
+  year?: number;
+  poster_url?: string;
+  critic_rating?: number | null;
+  audience_rating?: number | null;
+  user_rating?: number | null;
+  user_selected_host?: string | null;
+  created_at?: string;
+  suggestion_count?: number | null;
+  status?: string;
+  episode?: number | null;
+}
+
+
 const AdminPage: React.FC = () => {
   const { user, loading } = useAuth();
   const router = useRouter();
-  const [movies, setMovies] = useState<any[]>([]);
-  const [filteredMovies, setFilteredMovies] = useState<any[]>([]);
+  const [movies, setMovies] = useState<Movie[]>([]);
+  const [filteredMovies, setFilteredMovies] = useState<Movie[]>([]);
   const [isAddingMovie, setIsAddingMovie] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
-  const [suggestedMoviesRefreshKey, setSuggestedMoviesRefreshKey] = useState(0);
 
   // ✅ Sorting and Status state
   const [sortKey, setSortKey] = useState<string>("episode");
@@ -33,10 +48,6 @@ const AdminPage: React.FC = () => {
   const triggerRefresh = () => {
     setRefreshKey((prevKey) => prevKey + 1);
     refreshMovies();
-  };
-
-  const triggerSuggestedMoviesRefresh = () => {
-    setSuggestedMoviesRefreshKey((prevKey) => prevKey + 1);
   };
 
   useEffect(() => {
@@ -94,7 +105,6 @@ const AdminPage: React.FC = () => {
         <MovieSearchDialog
           fetchMovies={refreshMovies}
           triggerRefresh={triggerRefresh}
-          triggerSuggestedMoviesRefresh={triggerSuggestedMoviesRefresh}
           isAdmin={true}
         />
         <StatusToggle status={viewStatus} onToggle={setViewStatus} /> {/* ✅ Add Toggle */}
@@ -128,12 +138,15 @@ const AdminPage: React.FC = () => {
           {filteredMovies.map((movie) => (
             <div key={movie.id} className="relative">
               <MovieCard
-                movie={movie}
+                movie={{
+                  ...movie,
+                  suggestion_count: movie.suggestion_count ?? 0,
+                  status: movie.status ?? ""
+                }}
                 editable={true}
                 onDelete={refreshMovies}
                 onEpisodeChange={triggerRefresh} 
                 showDelete={true}
-                triggerSuggestedMoviesRefresh={triggerSuggestedMoviesRefresh}
               />
             </div>
           ))}

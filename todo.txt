@@ -1,1 +1,3 @@
-Add achievements
+Admins shouldn't be able to add the same movie twice
+Make top 100 and insights open in a dialog like the suggested movies and queue do
+Achievements and badges to gamify it

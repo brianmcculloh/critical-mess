@@ -7,20 +7,27 @@ import { Button } from "@/components/ui/button";
 import { Trash2 } from "lucide-react";
 import { supabase } from "@/lib/supabaseClient";
 import MovieSearchDialog from "@/components/MovieSearchDialog";
-import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
+import { DragDropContext, Droppable, Draggable, DropResult } from "@hello-pangea/dnd";
 
 const hosts = ["combined", "nick", "brian", "gris", "ben"];
+
+interface Movie {
+  id: number;
+  title: string;
+  year?: number;
+  total_score?: number;
+}
 
 const TopHundred: React.FC = () => {
   const { user } = useAuth();
   const [selectedHost, setSelectedHost] = useState("combined");
-  const [movies, setMovies] = useState<any[]>([]);
+  const [movies, setMovies] = useState<Movie[]>([]);
   const [loading, setLoading] = useState(true);
   const [deletingMovieId, setDeletingMovieId] = useState<number | null>(null);
   const [movieHosts, setMovieHosts] = useState<Record<string, string>>({});
 
   // Caches to store fetched movies and host mappings per host.
-  const [cachedMovies, setCachedMovies] = useState<Record<string, any[]>>({});
+  const [cachedMovies, setCachedMovies] = useState<Record<string, Movie[]>>({});
   const [cachedMovieHosts, setCachedMovieHosts] = useState<Record<string, Record<string, string>>>({});
 
   // Helper function to invalidate the combined view cache.
@@ -103,7 +110,7 @@ const TopHundred: React.FC = () => {
     await fetchMovies();
   };
 
-  const onDragEnd = async (result: any) => {
+  const onDragEnd = async (result: DropResult) => {
     if (!result.destination || selectedHost === "combined") return;
     
     // Reorder movies based on drag-and-drop.
@@ -136,7 +143,7 @@ const TopHundred: React.FC = () => {
     }
   };
 
-  const handleDeleteMovie = async (movieId: number, movieTitle: string) => {
+  const handleDeleteMovie = async (movieId: number) => {
     if (selectedHost === "combined") return;
   
     try {
@@ -242,7 +249,7 @@ const TopHundred: React.FC = () => {
                               {user?.isAdmin && (
                                 <button
                                   className="ml-2 p-2"
-                                  onClick={() => handleDeleteMovie(movie.id, movie.title)}
+                                  onClick={() => handleDeleteMovie(movie.id)}
                                   disabled={deletingMovieId === movie.id}
                                 >
                                   <Trash2 size={20} className="text-black/30 hover:text-black dark:text-white/30 dark:hover:text-white transition" />

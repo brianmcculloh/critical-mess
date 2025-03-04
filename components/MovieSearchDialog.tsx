@@ -39,7 +39,7 @@ interface Movie {
 interface MovieSearchDialogProps {
   fetchMovies: () => Promise<void>;
   triggerRefresh: () => void;
-  triggerSuggestedMoviesRefresh: () => void;
+  triggerSuggestedMoviesRefresh?: () => void;
   isAdmin: boolean;
   selectedHost?: string;
 }
@@ -235,7 +235,7 @@ const MovieSearchDialog: React.FC<MovieSearchDialogProps> = ({
           if (isAdmin) {
             triggerRefresh();
           } else {
-            triggerSuggestedMoviesRefresh();
+            triggerSuggestedMoviesRefresh?.();
           }
           setShowSuccessAlert(true);
         }

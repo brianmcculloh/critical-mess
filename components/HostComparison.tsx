@@ -18,7 +18,24 @@ interface HostComparisonProps {
   icon?: React.ReactNode;
 }
 
-const CustomTooltip = ({ active, payload }: any) => {
+interface ProcessedDataItem {
+  host_name: string;
+  value: number;
+  color?: string;
+}
+
+interface CustomTooltipPayload {
+  payload: ProcessedDataItem;
+  value: number;
+  name: string;
+}
+
+interface CustomTooltipProps {
+  active?: boolean;
+  payload?: CustomTooltipPayload[];
+}
+
+const CustomTooltip: React.FC<CustomTooltipProps> = ({ active, payload }) => {
   if (active && payload && payload.length) {
     return (
       <div className="p-2 rounded shadow-md uppercase bg-black text-white">
@@ -29,7 +46,7 @@ const CustomTooltip = ({ active, payload }: any) => {
   return null;
 };
 
-const HostComparison: React.FC<HostComparisonProps> = ({ title, description, dataKey, data, isDisparity = false, icon, relativeYAxis = false }) => {
+const HostComparison: React.FC<HostComparisonProps> = ({ title, description, data, isDisparity = false, icon, relativeYAxis = false }) => {
   const { theme } = useTheme();
   const isDarkMode = theme === "dark";
   const axisColor = isDarkMode ? "#BBB" : "#333";
