@@ -165,7 +165,7 @@ const Episode: React.FC<EpisodeProps> = ({
         </Alert>
       )}
       <div
-        className={`absolute bottom-2 left-2 transition-all bg-white text-default dark:bg-black border border-black dark:border-white/30 rounded-md px-3 py-2 text-sm ${
+        className={`absolute bottom-2 left-2 transition-all bg-white text-default dark:bg-black border border-black dark:border-white rounded-md px-3 py-2 text-sm ${
           isAdmin ? "hover:border-primary dark:hover:border-white cursor-pointer" : ""
         }`}
         onClick={() => isAdmin && handleStartEditing()}

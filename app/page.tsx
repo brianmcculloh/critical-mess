@@ -12,6 +12,7 @@ import SuggestedMovies from "@/components/SuggestedMovies";
 import QueuedMovies from "@/components/QueuedMovies";
 import { Sparkles, Rocket } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import Tutorial from "@/components/Tutorial";
 
 interface Movie {
   id: number;
@@ -37,6 +38,7 @@ const HomePage: React.FC = () => {
   const [refreshKey, setRefreshKey] = useState(0);
   const [suggestedMoviesRefreshKey, setSuggestedMoviesRefreshKey] = useState(0);
   const router = useRouter();
+  const [showTutorial, setShowTutorial] = useState(false);
 
   const triggerRefresh = () => {
     setRefreshKey((prevKey) => prevKey + 1);
@@ -63,6 +65,13 @@ const HomePage: React.FC = () => {
     setFilteredMovies(episodeMovies);
   }, [movies]);
   
+  useEffect(() => {
+    const hasVisited = localStorage.getItem("hasVisited");
+    if (!hasVisited) {
+      setShowTutorial(true);
+      localStorage.setItem("hasVisited", "true");
+    }
+  }, []);
 
   const handleSearch = (searchTerm: string) => {
     if (!searchTerm) {
@@ -114,6 +123,7 @@ const HomePage: React.FC = () => {
 
   return (
     <>
+      {showTutorial && <Tutorial onClose={() => setShowTutorial(false)} />}
       <div className="flex gap-2 mt-4 pb-4 items-center">
         <MovieSearchLocal onSearch={handleSearch} />
         <Sorting onSortChange={handleSortChange} currentSortKey={sortKey} currentSortOrder={sortOrder} />

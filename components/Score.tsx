@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState, useEffect, useRef } from "react";
 import FloatingText from "@/components/FloatingText";
 import { Popcorn } from "lucide-react";
@@ -31,6 +33,7 @@ interface ScoreProps {
   saveRating: (field: string, value: number) => Promise<void>;
   isEditable?: boolean;
   forceEditable?: boolean;
+  disabled?: boolean;
 }
 
 const Score: React.FC<ScoreProps> = ({
@@ -43,6 +46,7 @@ const Score: React.FC<ScoreProps> = ({
   saveRating,
   isEditable = false,
   forceEditable = false,
+  disabled = false,
 }) => {
   const [localValue, setLocalValue] = useState<string>(value?.toString() ?? "");
   const [originalValue, setOriginalValue] = useState<string>(value?.toString() ?? "");
@@ -98,11 +102,41 @@ const Score: React.FC<ScoreProps> = ({
     ? "Tell us your rating out of 100!"
     : `Score for ${label}`;
 
+  // If disabled, render static content with no tooltips or interactivity.
+  if (disabled) {
+    return (
+      <div className="flex-1 relative flex flex-col items-center justify-center">
+        <div className="flex items-center gap-2">
+          {label.toLowerCase().includes("popcorn") ? (
+            <>
+              <Popcorn className={`w-8 h-8 ${getColorClass()}`} />
+              <span className="sr-only">Popcornmeter Score</span>
+            </>
+          ) : label.toLowerCase().includes("tomato") ? (
+            <>
+              <TomatoIcon className={`w-8 h-8 ${getColorClass()}`} />
+              <span className="sr-only">Tomatometer Score</span>
+            </>
+          ) : (
+            <span className="font-semibold">{label}</span>
+          )}
+        </div>
+        <div className={`font-bold transition ${getTextSizeClass()} ${getColorClass()}`}>
+          {value !== null ? (
+            <span>{value}%</span>
+          ) : (
+            <span className="text-black/40 dark:text-white/40 font-normal">n/a</span>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  // If not disabled, allow interactivity with tooltips.
   return (
     <TooltipProvider delayDuration={0}>
       <Tooltip>
         <TooltipTrigger asChild>
-          {/* ✅ Wrapping the ENTIRE score box with tooltip */}
           <div className="flex-1 relative flex flex-col items-center justify-center">
             <div className="flex items-center gap-2">
               {label.toLowerCase().includes("popcorn") ? (
@@ -120,7 +154,6 @@ const Score: React.FC<ScoreProps> = ({
               )}
             </div>
 
-            {/* ✅ Display score with dynamic text size & color */}
             {(isEditable || forceEditable) && editingField === field ? (
               <>
                 {label.toLowerCase().includes("popcorn") || label.toLowerCase().includes("tomato") ? (
@@ -137,14 +170,12 @@ const Score: React.FC<ScoreProps> = ({
                     const inputValue = e.target.value;
                     // Allow only digits and empty string
                     if (/^\d*$/.test(inputValue)) {
-                      // Ensure the value is between 0 and 100
                       const numericValue = Number(inputValue);
                       if (numericValue <= 100) {
                         setLocalValue(inputValue);
                       }
                     }
                   }}
-                  
                   onBlur={handleSave}
                   onKeyDown={(e) => e.key === "Enter" && handleSave()}
                   autoFocus
@@ -160,16 +191,10 @@ const Score: React.FC<ScoreProps> = ({
                     setOriginalValue(value?.toString() ?? "");
                   }
                 }}
-                className={`font-bold transition ${getTextSizeClass()} ${
-                  isEditable || forceEditable ? "cursor-pointer" : ""
-                }`}
+                className={`font-bold transition ${getTextSizeClass()} ${isEditable || forceEditable ? "cursor-pointer" : ""}`}
               >
                 {value !== null ? (
-                  <span
-                    className={`${
-                      isEditable || forceEditable ? "hover:text-white transition" : ""
-                    } ${getColorClass()}`}
-                  >
+                  <span className={`${isEditable || forceEditable ? "hover:text-white transition" : ""} ${getColorClass()}`}>
                     {value}%
                   </span>
                 ) : isEditable || forceEditable ? (
@@ -180,7 +205,6 @@ const Score: React.FC<ScoreProps> = ({
                   <span className="text-black/40 dark:text-white/40 font-normal">n/a</span>
                 )}
               </div>
-
             )}
 
             <FloatingText

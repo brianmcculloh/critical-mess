@@ -33,6 +33,7 @@ interface Movie {
 interface MovieCardProps {
   movie: Movie;
   editable?: boolean;
+  disabled?: boolean;
   showRTRatings?: boolean;
   showHostRatings?: boolean;
   showUserRatings?: boolean;
@@ -53,9 +54,10 @@ interface MovieCardProps {
 const MovieCard: React.FC<MovieCardProps> = ({
   movie,
   editable = false,
-  showRTRatings = true,        // ✅ Default to true
-  showHostRatings = true,      // ✅ Default to true
-  showUserRatings = true,      // ✅ Default to true
+  disabled = false,
+  showRTRatings = true,
+  showHostRatings = true,
+  showUserRatings = true,
   showDelete = false,
   showEpisode = true,
   showSuggestedBy = false,
@@ -191,6 +193,7 @@ const MovieCard: React.FC<MovieCardProps> = ({
       {(showRTRatings || showHostRatings || showUserRatings) && (
         <ScoresDisplay
           movie={movie}
+          disabled={disabled}
           isAdmin={isAdmin}
           setUserRating={setUserRating}
           showRTRatings={showRTRatings}
@@ -206,6 +209,7 @@ const MovieCard: React.FC<MovieCardProps> = ({
             movieId={movie.id}
             initialSelection={null}
             onSelectionUpdate={handleHostSelectionUpdate}
+            disabled={disabled}
           />
           <HeatMeter key={heatMeterKey} movieId={movie.id} />
         </>

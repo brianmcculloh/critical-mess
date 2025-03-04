@@ -72,7 +72,7 @@ const TopTen: React.FC<TopTenProps> = ({ host, showLowest = false }) => {
         {loading ? (
           <p>Loading...</p>
         ) : (
-          <ResponsiveContainer width="100%" height={300}>
+          <ResponsiveContainer width="100%" height={350}>
             <BarChart data={movieData} layout="vertical">
               <CartesianGrid strokeDasharray="3 3" stroke={isDarkMode ? "#333" : "#CCC"} />
               <XAxis type="number" tick={{ fill: axisColor }} domain={[0, 100]} />

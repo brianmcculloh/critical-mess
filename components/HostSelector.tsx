@@ -1,7 +1,15 @@
+"use client";
+
 import React, { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import { v4 as uuidv4 } from "uuid";
 import FloatingText from "@/components/FloatingText";
+import {
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+  TooltipProvider,
+} from "@/components/ui/tooltip";
 
 const HOSTS = ["nick", "brian", "gris", "ben"] as const;
 type Host = (typeof HOSTS)[number];
@@ -10,10 +18,18 @@ interface HostSelectorProps {
   movieId: number;
   initialSelection?: Host | null;
   onSelectionUpdate: (selectedHost: Host) => void;
+  disabled?: boolean;
 }
 
-const HostSelector: React.FC<HostSelectorProps> = ({ movieId, initialSelection, onSelectionUpdate }) => {
-  const [selectedHost, setSelectedHost] = useState<Host | null>(initialSelection || null);
+const HostSelector: React.FC<HostSelectorProps> = ({
+  movieId,
+  initialSelection,
+  onSelectionUpdate,
+  disabled = false,
+}) => {
+  const [selectedHost, setSelectedHost] = useState<Host | null>(
+    initialSelection || null
+  );
   const [loading, setLoading] = useState(false);
   const [clientId, setClientId] = useState<string | null>(null);
   const [feedbackStates, setFeedbackStates] = useState<Record<Host, boolean>>({
@@ -59,11 +75,17 @@ const HostSelector: React.FC<HostSelectorProps> = ({ movieId, initialSelection, 
     try {
       const { error } = await supabase
         .from("user_host_votes")
-        .upsert({ client_id: clientId, movie_id: movieId, host }, { onConflict: "client_id, movie_id" });
+        .upsert(
+          { client_id: clientId, movie_id: movieId, host },
+          { onConflict: "client_id, movie_id" }
+        );
 
       if (error) throw error;
       setFeedbackStates((prev) => ({ ...prev, [host]: false }));
-      setTimeout(() => setFeedbackStates((prev) => ({ ...prev, [host]: true })), 0);
+      setTimeout(
+        () => setFeedbackStates((prev) => ({ ...prev, [host]: true })),
+        0
+      );
       setSelectedHost(host);
       onSelectionUpdate(host);
     } catch (error) {
@@ -73,30 +95,54 @@ const HostSelector: React.FC<HostSelectorProps> = ({ movieId, initialSelection, 
     }
   };
 
-  return (
+  const content = (
     <div className="p-2">
-      <p className="text-sm text-black/60 dark:text-white/60 mt-1 mb-0"><span className="font-bold">Heat Meter:</span> which host did you resonate with?</p>
+      {/* Host selection buttons */}
       <div className="mt-3 flex gap-2 justify-stretch">
         {HOSTS.map((host) => (
           <div className="relative inline-block grow" key={host}>
             <button
-              className={`px-3 py-1 rounded-lg transition-colors border-2 w-full
-                ${selectedHost === host ? "border-primary bg-primary/40" : "border-primary/10 hover:border-primary bg-primary/10"}
-                ${loading ? "opacity-50 cursor-not-allowed" : ""}`}
-              onClick={() => handleSelectHost(host)}
-              disabled={loading}
+              className={`px-3 py-1 rounded-lg transition-colors border-2 w-full ${
+                selectedHost === host
+                  ? "border-primary bg-primary/40"
+                  : `border-primary/10 ${disabled ? "" : "hover:border-primary"} bg-primary/10`
+              }`}
+              onClick={() => {
+                if (!disabled && !loading) handleSelectHost(host);
+              }}
+              disabled={loading || disabled}
             >
               {host.charAt(0).toUpperCase() + host.slice(1)}
             </button>
             <FloatingText
               show={feedbackStates[host]}
               message="Saved!"
-              onComplete={() => setFeedbackStates((prev) => ({ ...prev, [host]: false }))}
+              onComplete={() =>
+                setFeedbackStates((prev) => ({ ...prev, [host]: false }))
+              }
             />
           </div>
         ))}
       </div>
     </div>
+  );
+
+  if (disabled) {
+    return content;
+  }
+
+  return (
+    <TooltipProvider delayDuration={0}>
+      <Tooltip>
+        <TooltipTrigger asChild>{content}</TooltipTrigger>
+        <TooltipContent
+          side="top"
+          className="bg-black text-white dark:bg-black dark:text-white text-sm rounded-lg px-3 py-2 shadow-lg"
+        >
+          <span>Heat Meter: which host did you resonate with?</span>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
   );
 };
 

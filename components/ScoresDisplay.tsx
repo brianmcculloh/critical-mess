@@ -4,7 +4,12 @@ import React, { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import { Separator } from "@/components/ui/separator";
 import Score from "./Score";
-import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/ui/tooltip";
+import {
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+  TooltipProvider,
+} from "@/components/ui/tooltip";
 
 interface Movie {
   id: number;
@@ -26,15 +31,17 @@ interface ScoresDisplayProps {
   showRTRatings?: boolean;
   showHostRatings?: boolean;
   showUserRatings?: boolean;
+  disabled?: boolean;
 }
 
 const ScoresDisplay: React.FC<ScoresDisplayProps> = ({
   movie,
   isAdmin,
   setUserRating,
-  showRTRatings = true,     // ✅ Default true
-  showHostRatings = true,   // ✅ Default true
-  showUserRatings = true,   // ✅ Default true
+  showRTRatings = true,
+  showHostRatings = true,
+  showUserRatings = true,
+  disabled = false,
 }) => {
   const [editingField, setEditingField] = useState<string | null>(null);
   const [updatedMovie, setUpdatedMovie] = useState<Movie>(movie);
@@ -43,7 +50,10 @@ const ScoresDisplay: React.FC<ScoresDisplayProps> = ({
   const [numUserRatings, setNumUserRatings] = useState<number>(0);
   const [disparity, setDisparity] = useState<number | null>(movie.disparity || null);
 
-  const calculateAndUpdateDisparity = async (critic: number | null, audience: number | null) => {
+  const calculateAndUpdateDisparity = async (
+    critic: number | null,
+    audience: number | null
+  ) => {
     if (critic !== null && audience !== null) {
       const newDisparity = Math.abs(critic - audience);
       setDisparity(newDisparity);
@@ -101,10 +111,9 @@ const ScoresDisplay: React.FC<ScoresDisplayProps> = ({
     } else {
       const clientId = localStorage.getItem("client_id");
       if (!clientId) return;
-      await supabase.from("user_ratings").upsert(
-        { client_id: clientId, movie_id: movie.id, rating: value },
-        { onConflict: "client_id,movie_id" }
-      );
+      await supabase
+        .from("user_ratings")
+        .upsert({ client_id: clientId, movie_id: movie.id, rating: value }, { onConflict: "client_id,movie_id" });
       setUserRatingState(value);
       setUserRating && setUserRating(value);
 
@@ -133,7 +142,7 @@ const ScoresDisplay: React.FC<ScoresDisplayProps> = ({
 
   return (
     <div className="mt-1">
-      {/* ✅ Rotten Tomatoes Ratings Section */}
+      {/* Rotten Tomatoes Ratings Section */}
       {showRTRatings && (
         <div className="relative flex gap-2 items-stretch mb-3 mt-3">
           <div className="bg-accent px-3 py-3 rounded-lg flex-1 relative">
@@ -146,20 +155,21 @@ const ScoresDisplay: React.FC<ScoresDisplayProps> = ({
               setTempValue={() => {}}
               saveRating={saveRating}
               isEditable={isAdmin}
+              disabled={disabled}
             />
           </div>
 
           {updatedMovie.critic_rating !== null &&
-          updatedMovie.audience_rating !== null &&
-          disparity !== undefined &&
-          disparity !== null && ( // ✅ Explicitly check for null, allowing 0 to display
-            <div className="absolute left-1/2 transform -translate-x-1/2 top-1/2 -translate-y-1/2 z-10 bg-card rounded-full w-12 h-12 flex flex-col items-center justify-center gap-0">
-              <span className="text-[9px] uppercase text-black/50 dark:text-white/50 leading-none">
-                Gap
-              </span>
-              <span className="leading-none text-xl font-bold">{disparity}</span>
-            </div>
-          )}
+            updatedMovie.audience_rating !== null &&
+            disparity !== undefined &&
+            disparity !== null && (
+              <div className="absolute left-1/2 transform -translate-x-1/2 top-1/2 -translate-y-1/2 z-10 bg-card rounded-full w-12 h-12 flex flex-col items-center justify-center gap-0">
+                <span className="text-[10px] uppercase text-black/60 dark:text-white/60 leading-none">
+                  Gap
+                </span>
+                <span className="leading-none text-xl font-bold">{disparity}</span>
+              </div>
+            )}
 
           <div className="bg-accent px-3 py-3 rounded-lg flex-1 relative">
             <Score
@@ -171,11 +181,13 @@ const ScoresDisplay: React.FC<ScoresDisplayProps> = ({
               setTempValue={() => {}}
               saveRating={saveRating}
               isEditable={isAdmin}
+              disabled={disabled}
             />
           </div>
         </div>
       )}
-      {/* ✅ Host Scores Section */}
+
+      {/* Host Scores Section */}
       {showHostRatings && (
         <div className="flex gap-2 flex-wrap items-start">
           {["Nick", "Brian", "Gris", "Ben"].map((host, index, array) => (
@@ -189,6 +201,7 @@ const ScoresDisplay: React.FC<ScoresDisplayProps> = ({
                 setTempValue={() => {}}
                 saveRating={saveRating}
                 isEditable={isAdmin}
+                disabled={disabled}
               />
               {index < array.length - 1 && <Separator orientation="vertical" className="h-10" />}
             </React.Fragment>
@@ -196,7 +209,7 @@ const ScoresDisplay: React.FC<ScoresDisplayProps> = ({
         </div>
       )}
 
-      {/* ✅ User Rating Section */}
+      {/* User Rating Section */}
       {showUserRatings && !isAdmin && (
         <>
           <Separator className="my-2" />
@@ -210,36 +223,59 @@ const ScoresDisplay: React.FC<ScoresDisplayProps> = ({
               setTempValue={() => {}}
               saveRating={saveRating}
               forceEditable
+              disabled={disabled}
             />
             <Separator orientation="vertical" className="h-10" />
-            <TooltipProvider delayDuration={0}>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <div className="flex-1 relative flex flex-col items-center justify-center">
-                    <div className="flex items-center gap-2 font-semibold">Users</div>
-                    <div>
-                      {avgUserRating !== null ? (
-                        <>
-                          <strong className={`text-base ${getAvgRatingColorClass()}`}>
-                            {`${avgUserRating.toFixed(1)}%`}
-                          </strong>
-                          {numUserRatings > 0 && (
-                            <span className="text-xs text-black/40 dark:text-white/40 ml-1">
-                              ({numUserRatings})
-                            </span>
-                          )}
-                        </>
-                      ) : (
-                        <span className="text-black/40 dark:text-white/40 font-normal">n/a</span>
+            {disabled ? (
+              <div className="flex-1 relative flex flex-col items-center justify-center">
+                <div className="flex items-center gap-2 font-semibold">Users</div>
+                <div>
+                  {avgUserRating !== null ? (
+                    <>
+                      <strong className={`text-base ${getAvgRatingColorClass()}`}>
+                        {`${avgUserRating.toFixed(1)}%`}
+                      </strong>
+                      {numUserRatings > 0 && (
+                        <span className="text-xs text-black/40 dark:text-white/40 ml-1">
+                          ({numUserRatings})
+                        </span>
                       )}
+                    </>
+                  ) : (
+                    <span className="text-black/40 dark:text-white/40 font-normal">n/a</span>
+                  )}
+                </div>
+              </div>
+            ) : (
+              <TooltipProvider delayDuration={0}>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div className="flex-1 relative flex flex-col items-center justify-center">
+                      <div className="flex items-center gap-2 font-semibold">Users</div>
+                      <div>
+                        {avgUserRating !== null ? (
+                          <>
+                            <strong className={`text-base ${getAvgRatingColorClass()}`}>
+                              {`${avgUserRating.toFixed(1)}%`}
+                            </strong>
+                            {numUserRatings > 0 && (
+                              <span className="text-xs text-black/40 dark:text-white/40 ml-1">
+                                ({numUserRatings})
+                              </span>
+                            )}
+                          </>
+                        ) : (
+                          <span className="text-black/40 dark:text-white/40 font-normal">n/a</span>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                </TooltipTrigger>
-                <TooltipContent className="bg-black text-white text-xs rounded-lg px-3 py-2 shadow-lg">
-                  <span>Average score for all of our listeners</span>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
+                  </TooltipTrigger>
+                  <TooltipContent className="bg-black text-white text-xs rounded-lg px-3 py-2 shadow-lg">
+                    <span>Average score for all of our listeners</span>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            )}
           </div>
         </>
       )}

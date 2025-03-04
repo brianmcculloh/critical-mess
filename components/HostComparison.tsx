@@ -64,7 +64,7 @@ const HostComparison: React.FC<HostComparisonProps> = ({ title, description, dat
         </div>
       </CardHeader>
       <CardContent>
-        <ResponsiveContainer width="100%" height={250}>
+        <ResponsiveContainer width="100%" height={300}>
           <BarChart data={processedData}>
             <CartesianGrid strokeDasharray="3 3" stroke={isDarkMode ? "#333" : "#CCC"} />
             <XAxis dataKey="host_name" tickFormatter={(name) => name.toUpperCase()} tick={{ fill: axisColor }} />
