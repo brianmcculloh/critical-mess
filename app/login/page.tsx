@@ -11,8 +11,9 @@ const LoginPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [message, setMessage] = useState(""); // For forgot password success message
 
-  // 🔹 If already logged in, redirect to admin automatically
+  // If already logged in, redirect to admin automatically
   useEffect(() => {
     if (user) {
       router.push("/admin");
@@ -34,7 +35,26 @@ const LoginPage = () => {
     }
 
     console.log("✅ Login successful:", data);
-    router.push("/admin"); // ✅ Ensure user is redirected after login
+    router.push("/admin"); // Ensure user is redirected after login
+  };
+
+  // Forgot password function
+  const handleForgotPassword = async () => {
+    setError("");
+    setMessage("");
+    if (!email) {
+      setError("Please provide your email address first.");
+      return;
+    }
+    const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: window.location.origin + "/reset-password",
+    });
+    if (error) {
+      console.error("🚨 Password Reset Error:", error.message);
+      setError(error.message);
+    } else {
+      setMessage("Password reset email has been sent. Check your inbox.");
+    }
   };
 
   return (
@@ -42,6 +62,7 @@ const LoginPage = () => {
       <h1 className="text-2xl font-bold">Admin Login</h1>
       <form onSubmit={handleLogin} className="mt-4 flex flex-col gap-4">
         {error && <p className="text-red-500">{error}</p>}
+        {message && <p className="text-green-500">{message}</p>}
         <input
           type="email"
           placeholder="Email"
@@ -60,6 +81,12 @@ const LoginPage = () => {
           Login
         </button>
       </form>
+      <button
+        onClick={handleForgotPassword}
+        className="mt-4 text-sm text-blue-500 hover:underline"
+      >
+        Forgot Password?
+      </button>
     </div>
   );
 };
