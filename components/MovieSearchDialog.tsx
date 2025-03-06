@@ -19,7 +19,7 @@ import { useAuth } from "@/contexts/AuthContext";
 
 // Environment variables remain unchanged
 const OMDB_API_KEY = process.env.NEXT_PUBLIC_OMDB_API_KEY;
-const OMDB_API_URL = "http://www.omdbapi.com/";
+const OMDB_API_URL = "https://www.omdbapi.com/";
 
 // Extend the props to include an optional flag indicating we're coming from TopHundred.
 interface MovieSearchDialogProps {
