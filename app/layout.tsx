@@ -23,8 +23,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "The Critical Mess Hall",
-  description: "The official companion app for the Critical Mess Podcast",
+  title: "The Mess Hall",
+  description: "The official companion site for the Critical Mess Podcast",
 };
 
 export default function RootLayout({
