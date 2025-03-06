@@ -73,7 +73,7 @@ const ResetPasswordContent: React.FC = () => {
             className="border p-2 rounded"
             required
           />
-          <button type="submit" className="bg-primary text-white px-4 py-2 rounded">
+          <button type="submit" className="bg-primary text-black px-4 py-2 rounded">
             Reset Password
           </button>
         </form>

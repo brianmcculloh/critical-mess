@@ -190,8 +190,8 @@ const Episode: React.FC<EpisodeProps> = ({
   return (
     <>
       {showDuplicateAlert && (
-        <Alert className="shadow-lg bg-accent absolute top-8 w-5/6 left-1/2 transform -translate-x-1/2 z-50">
-          <TriangleAlert className="absolute left-3 top-1/2 transform w-5 h-5" />
+        <Alert className="shadow-lg bg-yellow text-black absolute top-8 w-5/6 left-1/2 transform -translate-x-1/2 z-50">
+          <TriangleAlert color="black" className="absolute left-3 top-1/2 transform w-5 h-5" />
           <AlertTitle>Duplicate Found</AlertTitle>
           <AlertDescription>Episode number already in use</AlertDescription>
         </Alert>
@@ -230,8 +230,8 @@ const Episode: React.FC<EpisodeProps> = ({
       {/* Bottom-right toast notification */}
       {showAlert && (
         <div className="fixed bottom-4 right-4 rounded-lg shadow-lg z-50">
-          <Alert className="shadow-lg bg-accent">
-            <TriangleAlert className="absolute left-3 top-1/2 transform w-5 h-5" />
+          <Alert className="shadow-lg bg-yellow text-black">
+            <TriangleAlert color="black" className="absolute left-3 top-1/2 transform w-5 h-5" />
             <AlertTitle>Saved!</AlertTitle>
             <AlertDescription>Episode updated</AlertDescription>
           </Alert>

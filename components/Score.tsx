@@ -247,8 +247,8 @@ const Score: React.FC<ScoreProps> = ({
       {/* Bottom-right notification toast – controlled by showAlert */}
       {showAlert && (
         <div className="fixed bottom-4 right-4 rounded-lg shadow-lg z-50">
-          <Alert className="shadow-lg bg-accent">
-            <ThumbsUp className="absolute left-3 top-1/2 transform w-5 h-5" />
+          <Alert className="shadow-lg bg-yellow text-black">
+            <ThumbsUp color="black" className="absolute left-3 top-1/2 transform w-5 h-5" />
             <AlertTitle>Saved!</AlertTitle>
             <AlertDescription>Score updated</AlertDescription>
           </Alert>

@@ -127,14 +127,14 @@ const InsightsPage: React.FC = () => {
       </TooltipProvider>
 
       <DialogContent
-        className="w-5/6 max-w-[1600px] max-h-screen overflow-y-auto"
+        className="w-full lg:w-5/6 max-w-[1600px] max-h-screen overflow-y-auto"
         onOpenAutoFocus={(event) => event.preventDefault()}
       >
         <DialogTitle>Insights</DialogTitle>
         <DialogDescription>
           View various analytics and comparisons about our hosts.
         </DialogDescription>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
           {loading ? (
             <p>Loading insights...</p>
           ) : (
@@ -190,10 +190,14 @@ const InsightsPage: React.FC = () => {
                 title="Heat Meter"
                 description="Which host is out here straight cooking every episode?"
                 dataKey="heat_meter"
-                data={hostAnalytics.map((host) => ({
-                  host_name: host.host_name,
-                  value: host.heat_meter * 100, // Convert to percentage
-                }))}
+                data={
+                  hostAnalytics
+                    .filter((host) => host.host_name.toLowerCase() !== "ben")
+                    .map((host) => ({
+                      host_name: host.host_name,
+                      value: host.heat_meter * 100,
+                    }))
+                }
                 relativeYAxis={true}
                 icon={<Flame />}
               />

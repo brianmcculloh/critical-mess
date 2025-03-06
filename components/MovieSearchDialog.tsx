@@ -220,11 +220,11 @@ const MovieSearchDialog: React.FC<MovieSearchDialogProps> = ({
     <>
       {showSuccessAlert && (
         <div className="fixed bottom-4 right-4 rounded-lg shadow-lg z-50">
-          <Alert className="shadow-lg bg-accent">
-            <ThumbsUp className="absolute left-3 top-1/2 transform w-5 h-5" />
+          <Alert className="shadow-lg bg-yellow text-black">
+            <ThumbsUp color="black" className="absolute left-3 top-1/2 transform w-5 h-5" />
             <AlertTitle>Bing!</AlertTitle>
             <AlertDescription>
-              {isAdmin ? "New movie added" : "Thanks for suggesting that!"}
+              {isAdmin ? "New movie added" : "Thanks for the suggestion!"}
             </AlertDescription>
           </Alert>
         </div>
@@ -239,8 +239,8 @@ const MovieSearchDialog: React.FC<MovieSearchDialogProps> = ({
         </DialogTrigger>
         <DialogContent>
           {showDuplicateAlert && (
-            <Alert className="shadow-lg bg-accent absolute -top-20 w-5/6 left-1/2 transform -translate-x-1/2">
-              <TriangleAlert className="absolute left-3 top-1/2 transform w-5 h-5" />
+            <Alert className="shadow-lg bg-yellow text-black absolute -top-20 w-5/6 left-1/2 transform -translate-x-1/2">
+              <TriangleAlert color="black" className="absolute left-3 top-1/2 transform w-5 h-5" />
               <AlertTitle>We got it.</AlertTitle>
               <AlertDescription>
                 You've already suggested that. We promise we'll take a look!
@@ -248,8 +248,8 @@ const MovieSearchDialog: React.FC<MovieSearchDialogProps> = ({
             </Alert>
           )}
           {showAlreadyExistsAlert && (
-            <Alert className="shadow-lg bg-accent absolute -top-20 w-5/6 left-1/2 transform -translate-x-1/2">
-              <TriangleAlert className="absolute left-3 top-1/2 transform w-5 h-5" />
+            <Alert className="shadow-lg bg-yellow text-black absolute -top-20 w-5/6 left-1/2 transform -translate-x-1/2">
+              <TriangleAlert color="black" className="absolute left-3 top-1/2 transform w-5 h-5" />
               <AlertTitle>Episode already exists!</AlertTitle>
               <AlertDescription>
                 {isAdmin
@@ -259,8 +259,8 @@ const MovieSearchDialog: React.FC<MovieSearchDialogProps> = ({
             </Alert>
           )}
           {showHostMovieExistsAlert && (
-            <Alert className="shadow-lg bg-accent absolute -top-20 w-5/6 left-1/2 transform -translate-x-1/2">
-              <TriangleAlert className="absolute left-3 top-1/2 transform w-5 h-5" />
+            <Alert className="shadow-lg bg-yellow text-black absolute -top-20 w-5/6 left-1/2 transform -translate-x-1/2">
+              <TriangleAlert color="black" className="absolute left-3 top-1/2 transform w-5 h-5" />
               <AlertTitle>Movie already exists</AlertTitle>
               <AlertDescription>
                 You've already added that movie to your top 100 list.
@@ -268,8 +268,8 @@ const MovieSearchDialog: React.FC<MovieSearchDialogProps> = ({
             </Alert>
           )}
           {showListFullAlert && (
-            <Alert className="shadow-lg bg-accent absolute -top-20 w-5/6 left-1/2 transform -translate-x-1/2">
-              <TriangleAlert className="absolute left-3 top-1/2 transform w-5 h-5" />
+            <Alert className="shadow-lg bg-yellow text-black absolute -top-20 w-5/6 left-1/2 transform -translate-x-1/2">
+              <TriangleAlert color="black" className="absolute left-3 top-1/2 transform w-5 h-5" />
               <AlertTitle>List is full</AlertTitle>
               <AlertDescription>
                 You've already added 100 movies to your list. Delete one to make room.
@@ -284,7 +284,7 @@ const MovieSearchDialog: React.FC<MovieSearchDialogProps> = ({
               ? "Add a new movie directly to the official Critical Mess list."
               : "Did you find a critical mess out in the wild? Add it to our legendary list!"}
           </DialogDescription>
-          <div className="p-4">
+          <div className="p-0 xs:p-4">
             <MovieSearch
               onSelectMovie={handleMovieSelection}
               fetchMovies={fetchMovies}

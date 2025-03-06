@@ -72,7 +72,7 @@ const MovieSearch: React.FC<MovieSearchProps> = ({ onSelectMovie, fetchMovies, i
         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5" />
         <input
           type="text"
-          className="w-96 p-2 pl-10 border rounded-lg focus:outline-none"
+          className="w-full p-2 pl-10 border rounded-lg focus:outline-none"
           placeholder="Search for a movie..."
           value={query}
           onChange={(e) => setQuery(e.target.value)}

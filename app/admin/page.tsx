@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useRouter } from "next/navigation";
 import MovieSearchDialog from "@/components/MovieSearchDialog";
+import MovieSearchLocal from "@/components/MovieSearchLocal";
 import MovieCard from "@/components/MovieCard";
 import SuggestedMovies from "@/components/SuggestedMovies";
 import Sorting from "@/components/Sorting";
@@ -11,6 +12,7 @@ import StatusToggle from "@/components/StatusToggle";
 import Insights from "@/components/Insights";
 import { fetchMovies } from "@/lib/movieUtils";
 import TopHundred from "@/components/TopHundred";
+import SkeletonMovieCard from "@/components/SkeletonMovieCard";
 
 interface Movie {
   id: number;
@@ -27,22 +29,23 @@ interface Movie {
   episode?: number | null;
 }
 
-
 const AdminPage: React.FC = () => {
-  const { user, loading } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const router = useRouter();
   const [movies, setMovies] = useState<Movie[]>([]);
   const [filteredMovies, setFilteredMovies] = useState<Movie[]>([]);
   const [isAddingMovie, setIsAddingMovie] = useState(false);
+  // Local loading state for fetching movies
+  const [loading, setLoading] = useState(true);
   const [refreshKey, setRefreshKey] = useState(0);
 
-  // ✅ Sorting and Status state
+  // Sorting and Status state
   const [sortKey, setSortKey] = useState<string>("episode");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
   const [viewStatus, setViewStatus] = useState<"episode" | "queue">("episode");
 
   const refreshMovies = async () => {
-    await fetchMovies(setMovies, setIsAddingMovie);
+    await fetchMovies(setMovies, setLoading);
   };
 
   const triggerRefresh = () => {
@@ -52,17 +55,17 @@ const AdminPage: React.FC = () => {
 
   useEffect(() => {
     const loadMovies = async () => {
-      await fetchMovies(setMovies, setIsAddingMovie);
+      await fetchMovies(setMovies, setLoading);
     };
     loadMovies();
   }, [refreshKey]);
 
-  // ✅ Filter + Sort movies based on toggle
+  // Filter + Sort movies based on viewStatus, sortKey, and sortOrder
   useEffect(() => {
     const filtered = movies
       .filter((movie) => movie.status === viewStatus)
       .sort((a, b) => {
-        const key = sortKey as keyof typeof a;
+        const key = sortKey as keyof Movie;
         let valueA: number | string = a[key] ?? 0;
         let valueB: number | string = b[key] ?? 0;
 
@@ -79,29 +82,50 @@ const AdminPage: React.FC = () => {
           valueB = b.created_at ? new Date(b.created_at).getTime() : 0;
         }
 
-        const numA = typeof valueA === "number" ? valueA : parseFloat(valueA.toString()) || 0;
-        const numB = typeof valueB === "number" ? valueB : parseFloat(valueB.toString()) || 0;
+        const numA =
+          typeof valueA === "number" ? valueA : parseFloat(valueA.toString()) || 0;
+        const numB =
+          typeof valueB === "number" ? valueB : parseFloat(valueB.toString()) || 0;
 
         return sortOrder === "asc" ? numA - numB : numB - numA;
       });
 
     setFilteredMovies(filtered);
-  }, [movies, sortKey, sortOrder, viewStatus]); // ✅ React to viewStatus
+  }, [movies, sortKey, sortOrder, viewStatus]);
 
   const handleSortChange = (newSortKey: string, newSortOrder: "asc" | "desc") => {
     setSortKey(newSortKey);
     setSortOrder(newSortOrder);
   };
 
+  // Implement local search filtering based on title or year
+  const handleSearch = (searchTerm: string) => {
+    if (!searchTerm) {
+      setFilteredMovies(movies.filter((movie) => movie.status === viewStatus));
+      return;
+    }
+
+    const filtered = movies
+      .filter((movie) => movie.status === viewStatus)
+      .filter((movie) =>
+        movie.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (movie.year && movie.year.toString().includes(searchTerm))
+      );
+
+    setFilteredMovies(filtered);
+  };
+
   useEffect(() => {
-    if (!loading && (!user || !user.isAdmin)) {
+    if (!authLoading && (!user || !user.isAdmin)) {
       router.push("/login");
     }
-  }, [user, loading, router]);
+  }, [user, authLoading, router]);
 
   return (
     <>
       <div className="flex gap-2 items-center flex-wrap">
+        {/* Add MovieSearchLocal before Sorting */}
+        <MovieSearchLocal onSearch={handleSearch} />
         <Sorting
           onSortChange={handleSortChange}
           currentSortKey={sortKey}
@@ -127,27 +151,35 @@ const AdminPage: React.FC = () => {
           </div>
         )}
 
-        <div
-          className={`grid custom-grid gap-4 transition-opacity ${
-            isAddingMovie ? "opacity-50 pointer-events-none" : "opacity-100"
-          }`}
-        >
-          {filteredMovies.map((movie) => (
-            <div key={movie.id} className="relative">
-              <MovieCard
-                movie={{
-                  ...movie,
-                  suggestion_count: movie.suggestion_count ?? 0,
-                  status: movie.status ?? ""
-                }}
-                editable={true}
-                onDelete={refreshMovies}
-                onEpisodeChange={triggerRefresh} 
-                showDelete={true}
-              />
-            </div>
-          ))}
-        </div>
+        {loading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            {[...Array(16)].map((_, index) => (
+              <SkeletonMovieCard key={index} />
+            ))}
+          </div>
+        ) : (
+          <div
+            className={`grid custom-grid gap-4 transition-opacity ${
+              isAddingMovie ? "opacity-50 pointer-events-none" : "opacity-100"
+            }`}
+          >
+            {filteredMovies.map((movie) => (
+              <div key={movie.id} className="relative">
+                <MovieCard
+                  movie={{
+                    ...movie,
+                    suggestion_count: movie.suggestion_count ?? 0,
+                    status: movie.status ?? ""
+                  }}
+                  editable={true}
+                  onDelete={refreshMovies}
+                  onEpisodeChange={triggerRefresh}
+                  showDelete={true}
+                />
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </>
   );

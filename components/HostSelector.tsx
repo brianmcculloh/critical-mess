@@ -13,7 +13,7 @@ import {
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { ThumbsUp } from "lucide-react";
 
-const HOSTS = ["nick", "brian", "gris", "ben"] as const;
+const HOSTS = ["nick", "brian", "gris"/*, "ben"*/] as const;
 type Host = (typeof HOSTS)[number];
 
 interface HostSelectorProps {
@@ -38,7 +38,7 @@ const HostSelector: React.FC<HostSelectorProps> = ({
     nick: false,
     brian: false,
     gris: false,
-    ben: false,
+    /*ben: false,*/
   });
   // New state to control the bottom-right alert
   const [showAlert, setShowAlert] = useState(false);
@@ -166,8 +166,8 @@ const HostSelector: React.FC<HostSelectorProps> = ({
       {/* Bottom-right notification toast */}
       {showAlert && (
         <div className="fixed bottom-4 right-4 rounded-lg shadow-lg z-50">
-          <Alert className="shadow-lg bg-accent">
-            <ThumbsUp className="absolute left-3 top-1/2 transform w-5 h-5" />
+          <Alert className="shadow-lg bg-yellow text-black">
+            <ThumbsUp color="black" className="absolute left-3 top-1/2 transform w-5 h-5" />
             <AlertTitle>Saved!</AlertTitle>
             <AlertDescription>
               Host selection updated

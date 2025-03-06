@@ -1,4 +1,2 @@
 Supabase backups - requires $25 per month pro plan
-Responsive - insights, moviesearchdialog
-Add search to admin page
 Achievements and badges to gamify it
