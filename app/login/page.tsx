@@ -17,6 +17,8 @@ const LoginPage = () => {
   useEffect(() => {
     if (user && user.isAdmin) {
       router.push("/admin");
+    } else if(user) {
+      router.push("/");
     }
   }, [user, router]);
 
