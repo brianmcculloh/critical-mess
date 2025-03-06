@@ -27,6 +27,14 @@ const SignupPage = () => {
     router.push("/login");
   };
 
+  const handleBackHome = async () => {
+    router.push("/");
+  };
+
+  const handleLogin = async () => {
+    router.push("/login");
+  };
+
   return (
     <div className="flex flex-col items-center justify-center h-screen">
       <h1 className="text-2xl font-bold">Create an Account</h1>
@@ -50,6 +58,18 @@ const SignupPage = () => {
           Sign Up
         </button>
       </form>
+      <button
+        onClick={handleLogin}
+        className="mt-4 text-sm hover:underline"
+      >
+        Login Instead
+      </button>
+      <button
+        onClick={handleBackHome}
+        className="mt-4 text-sm hover:underline"
+      >
+        &larr; Back To Homepage
+      </button>
     </div>
   );
 };

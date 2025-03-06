@@ -24,6 +24,10 @@ const LoginPage = () => {
     router.push("/");
   };
 
+  const handleCreateAccount = async () => {
+    router.push("/signup");
+  };
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -90,6 +94,12 @@ const LoginPage = () => {
         className="mt-4 text-sm hover:underline"
       >
         Forgot Password?
+      </button>
+      <button
+        onClick={handleCreateAccount}
+        className="mt-4 text-sm hover:underline"
+      >
+        Create An Account
       </button>
       <button
         onClick={handleBackHome}

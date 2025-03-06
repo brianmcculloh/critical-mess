@@ -82,10 +82,10 @@ const Tutorial: React.FC<TutorialProps> = ({ onClose }) => {
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
-            <div className="absolute top-[465px] -left-[150px]">
+            <div className="absolute top-[479px] -left-[150px]">
               <SpeechBubble message="Add your score here!" arrowDirection="right" />
             </div>
-            <div className="absolute top-[544px] -right-[315px]">
+            <div className="absolute top-[556px] -right-[315px]">
               <SpeechBubble message="Pick which host you liked most!" arrowDirection="left" />
             </div>
           </div>
@@ -93,7 +93,7 @@ const Tutorial: React.FC<TutorialProps> = ({ onClose }) => {
           <p>Loading example movie...</p>
         )}
         <div className="mt-2 flex justify-end absolute bottom-[10px] right-[10px]">
-          <Button onClick={onClose} className="text-lg font-bold">Got it!</Button>
+          <Button onClick={onClose} className="text-lg font-bold text-black">Got it!</Button>
         </div>
       </DialogContent>
     </Dialog>
