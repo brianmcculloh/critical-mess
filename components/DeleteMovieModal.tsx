@@ -6,22 +6,50 @@ import { supabase } from "@/lib/supabaseClient";
 import { Trash2 } from "lucide-react";
 
 interface DeleteMovieModalProps {
+  movieId: number; // pass the movie id
   movieTitle: string;
   onDelete: () => void;
   onClose: () => void;
 }
 
-export default function DeleteMovieModal({ movieTitle, onDelete, onClose }: DeleteMovieModalProps) {
+export default function DeleteMovieModal({
+  movieId,
+  movieTitle,
+  onDelete,
+  onClose,
+}: DeleteMovieModalProps) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const handleDelete = async () => {
     setLoading(true);
-    const { error } = await supabase.from('movies').delete().eq('title', movieTitle);
+    // First delete the movie from the movies table by its id
+    const { error: movieError } = await supabase
+      .from("movies")
+      .delete()
+      .eq("id", movieId);
     
-    if (error) {
-      console.error("Error deleting movie:", error);
+    if (movieError) {
+      console.error("Error deleting movie:", movieError);
     } else {
+      // Then delete all corresponding rows in user_host_votes
+      const { error: hostVotesError } = await supabase
+        .from("user_host_votes")
+        .delete()
+        .eq("movie_id", movieId);
+      if (hostVotesError) {
+        console.error("Error deleting host votes:", hostVotesError);
+      }
+
+      // And delete all corresponding rows in user_ratings
+      const { error: ratingsError } = await supabase
+        .from("user_ratings")
+        .delete()
+        .eq("movie_id", movieId);
+      if (ratingsError) {
+        console.error("Error deleting user ratings:", ratingsError);
+      }
+
       onDelete(); // Update UI after deletion
       onClose();
     }
@@ -34,7 +62,10 @@ export default function DeleteMovieModal({ movieTitle, onDelete, onClose }: Dele
     <Dialog.Root open={open} onOpenChange={setOpen}>
       <Dialog.Trigger asChild>
         <button className="absolute top-4 right-4 z-20">
-          <Trash2 size={20} className="text-black/30 hover:text-black dark:text-white/30 dark:hover:text-white transition" />
+          <Trash2
+            size={20}
+            className="text-black/30 hover:text-black dark:text-white/30 dark:hover:text-white transition"
+          />
         </button>
       </Dialog.Trigger>
       
@@ -44,7 +75,7 @@ export default function DeleteMovieModal({ movieTitle, onDelete, onClose }: Dele
           <Dialog.Title className="text-lg font-semibold">
             Delete Movie?
           </Dialog.Title>
-          <Dialog.Description className=" mt-2">
+          <Dialog.Description className="mt-2">
             Are you sure you want to delete <strong>{movieTitle}</strong>? This action cannot be undone.
           </Dialog.Description>
 

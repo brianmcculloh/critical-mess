@@ -157,7 +157,7 @@ const AdminPage: React.FC = () => {
               <SkeletonMovieCard key={index} />
             ))}
           </div>
-        ) : (
+        ) : filteredMovies.length > 0 ? (
           <div
             className={`grid custom-grid gap-4 transition-opacity ${
               isAddingMovie ? "opacity-50 pointer-events-none" : "opacity-100"
@@ -179,6 +179,8 @@ const AdminPage: React.FC = () => {
               </div>
             ))}
           </div>
+        ) : (
+          <p>No matching movies found.</p>
         )}
       </div>
     </>

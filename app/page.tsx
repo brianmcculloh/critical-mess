@@ -161,7 +161,7 @@ const HomePage: React.FC = () => {
           ))}
         </div>
       ) : (
-        <p className="text-zinc-500">No matching movies found.</p>
+        <p>No matching movies found.</p>
       )}
     </>
   );

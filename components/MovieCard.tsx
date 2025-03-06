@@ -217,6 +217,7 @@ const MovieCard: React.FC<MovieCardProps> = ({
 
       {showDelete && isAdmin && (
         <DeleteMovieModal
+          movieId={movie.id}
           movieTitle={movie.title}
           onDelete={() => {
             if (onDelete) onDelete();
