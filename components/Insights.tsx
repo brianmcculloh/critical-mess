@@ -192,7 +192,7 @@ const InsightsPage: React.FC = () => {
                 dataKey="heat_meter"
                 data={
                   hostAnalytics
-                    .filter((host) => host.host_name.toLowerCase() !== "ben")
+                    /*.filter((host) => host.host_name.toLowerCase() !== "ben")*/
                     .map((host) => ({
                       host_name: host.host_name,
                       value: host.heat_meter * 100,

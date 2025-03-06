@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
 
-const HOSTS = ["nick", "brian", "gris"/*, "ben"*/] as const;
+const HOSTS = ["nick", "brian", "gris", "ben"] as const;
 type Host = (typeof HOSTS)[number];
 
 interface HeatMeterProps {
@@ -15,7 +15,7 @@ const HeatMeter: React.FC<HeatMeterProps> = ({ movieId }) => {
     nick: 0,
     brian: 0,
     gris: 0,
-    /*ben: 0,*/
+    ben: 0,
   });
   const [loading, setLoading] = useState(true);
 
@@ -31,7 +31,7 @@ const HeatMeter: React.FC<HeatMeterProps> = ({ movieId }) => {
         if (error) throw error;
 
         if (data) {
-          const newVotes: Record<Host, number> = { nick: 0, brian: 0, gris: 0/*, ben: 0*/ };
+          const newVotes: Record<Host, number> = { nick: 0, brian: 0, gris: 0, ben: 0 };
           data.forEach((entry: { host: string }) => {
             if (newVotes[entry.host as Host] !== undefined) {
               newVotes[entry.host as Host] += 1;
