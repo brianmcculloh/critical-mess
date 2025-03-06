@@ -80,7 +80,7 @@ const TopTen: React.FC<TopTenProps> = ({ host, showLowest = false }) => {
               <Tooltip content={<CustomTooltip />} cursor={{ fill: isDarkMode ? "rgba(255, 255, 255, 0.05)" : "rgba(0, 0, 0, 0.05)" }} />
               <Bar dataKey="rating" radius={[0, 5, 5, 0]} fill="hsl(var(--primary))" barSize={20}>
                 {movieData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={`hsl(0, 0%, ${Math.max(20, 49.8 - (index * (30 / movieData.length)))}%)`} />
+                  <Cell key={`cell-${index}`} fill={`hsl(42, 82%, ${Math.max(20, 49.8 - (index * (30 / movieData.length)))}%)`} />
                 ))}
               </Bar>
             </BarChart>

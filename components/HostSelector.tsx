@@ -10,6 +10,8 @@ import {
   TooltipContent,
   TooltipProvider,
 } from "@/components/ui/tooltip";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+import { ThumbsUp } from "lucide-react";
 
 const HOSTS = ["nick", "brian", "gris", "ben"] as const;
 type Host = (typeof HOSTS)[number];
@@ -38,6 +40,8 @@ const HostSelector: React.FC<HostSelectorProps> = ({
     gris: false,
     ben: false,
   });
+  // New state to control the bottom-right alert
+  const [showAlert, setShowAlert] = useState(false);
 
   useEffect(() => {
     let storedClientId = localStorage.getItem("client_id");
@@ -68,6 +72,14 @@ const HostSelector: React.FC<HostSelectorProps> = ({
     fetchSelectedHost();
   }, [clientId, movieId]);
 
+  // Hide the alert after 4 seconds
+  useEffect(() => {
+    if (showAlert) {
+      const timer = setTimeout(() => setShowAlert(false), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [showAlert]);
+
   const handleSelectHost = async (host: Host) => {
     if (!clientId) return;
     setLoading(true);
@@ -81,6 +93,7 @@ const HostSelector: React.FC<HostSelectorProps> = ({
         );
 
       if (error) throw error;
+      // Reset and then trigger the FloatingText for this host
       setFeedbackStates((prev) => ({ ...prev, [host]: false }));
       setTimeout(
         () => setFeedbackStates((prev) => ({ ...prev, [host]: true })),
@@ -88,6 +101,8 @@ const HostSelector: React.FC<HostSelectorProps> = ({
       );
       setSelectedHost(host);
       onSelectionUpdate(host);
+      // Trigger the bottom-right alert notification
+      setShowAlert(true);
     } catch (error) {
       console.error("🚨 Error saving host selection:", error);
     } finally {
@@ -105,8 +120,10 @@ const HostSelector: React.FC<HostSelectorProps> = ({
               className={`px-3 py-1 rounded-lg transition-colors border-2 w-full ${
                 selectedHost === host
                   ? "border-primary bg-primary/40"
-                  : `border-primary/10 ${disabled ? "" : "hover:border-primary"} bg-primary/10`
-              }`}
+                  : `border-primary/10 ${
+                      disabled ? "" : "hover:border-primary"
+                    } bg-primary/10`
+              } ${disabled ? "cursor-not-allowed" : ""}`}
               onClick={() => {
                 if (!disabled && !loading) handleSelectHost(host);
               }}
@@ -114,6 +131,7 @@ const HostSelector: React.FC<HostSelectorProps> = ({
             >
               {host.charAt(0).toUpperCase() + host.slice(1)}
             </button>
+
             <FloatingText
               show={feedbackStates[host]}
               message="Saved!"
@@ -132,17 +150,32 @@ const HostSelector: React.FC<HostSelectorProps> = ({
   }
 
   return (
-    <TooltipProvider delayDuration={0}>
-      <Tooltip>
-        <TooltipTrigger asChild>{content}</TooltipTrigger>
-        <TooltipContent
-          side="top"
-          className="bg-black text-white dark:bg-black dark:text-white text-sm rounded-lg px-3 py-2 shadow-lg"
-        >
-          <span>Heat Meter: which host did you resonate with?</span>
-        </TooltipContent>
-      </Tooltip>
-    </TooltipProvider>
+    <>
+      <TooltipProvider delayDuration={0}>
+        <Tooltip>
+          <TooltipTrigger asChild>{content}</TooltipTrigger>
+          <TooltipContent
+            side="top"
+            className="bg-black text-white dark:bg-black dark:text-white text-sm rounded-lg px-3 py-2 shadow-lg"
+          >
+            <span>Heat Meter: which host did you resonate with?</span>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+
+      {/* Bottom-right notification toast */}
+      {showAlert && (
+        <div className="fixed bottom-4 right-4 rounded-lg shadow-lg z-50">
+          <Alert className="shadow-lg bg-accent">
+            <ThumbsUp className="absolute left-3 top-1/2 transform w-5 h-5" />
+            <AlertTitle>Saved!</AlertTitle>
+            <AlertDescription>
+              Host selection updated
+            </AlertDescription>
+          </Alert>
+        </div>
+      )}
+    </>
   );
 };
 

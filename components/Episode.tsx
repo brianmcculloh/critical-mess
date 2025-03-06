@@ -50,6 +50,8 @@ const Episode: React.FC<EpisodeProps> = ({
   const [originalEpisode, setOriginalEpisode] = useState<string>(initialEpisode.toString());
   const [showFeedback, setShowFeedback] = useState<boolean>(false);
   const [showDuplicateAlert, setShowDuplicateAlert] = useState<boolean>(false);
+  // New state for the bottom-right toast alert
+  const [showAlert, setShowAlert] = useState<boolean>(false);
   const pathname = usePathname();
   const isAdmin = pathname === "/admin";
   const inputRef = useRef<HTMLInputElement>(null);
@@ -67,6 +69,14 @@ const Episode: React.FC<EpisodeProps> = ({
     }
   }, [editing]);
 
+  // Auto-hide the toast alert after 4 seconds
+  useEffect(() => {
+    if (showAlert) {
+      const timer = setTimeout(() => setShowAlert(false), 4000);
+      return () => clearTimeout(timer);
+    }
+  }, [showAlert]);
+
   const handleStartEditing = () => {
     setEditing(true);
     if (onStartEditing) onStartEditing(); // ✅ Notify parent
@@ -77,7 +87,6 @@ const Episode: React.FC<EpisodeProps> = ({
     if (onStopEditing) onStopEditing(); // ✅ Notify parent
   };
   
-
   // ✅ Handle input changes with validation (0-10000 only)
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const inputValue = e.target.value;
@@ -92,7 +101,7 @@ const Episode: React.FC<EpisodeProps> = ({
     }
   };
 
-  // ✅ Save only if valid number between 0 and 100
+  // ✅ Save only if valid number between 0 and 10000
   const handleSave = async () => {
     const numericValue = Number(tempEpisode);
     if (
@@ -162,9 +171,12 @@ const Episode: React.FC<EpisodeProps> = ({
             }
             if (triggerSuggestedMoviesRefresh) triggerSuggestedMoviesRefresh();
           }
-      
+          // Trigger the FloatingText and the bottom-right toast alert
           setShowFeedback(false);
-          setTimeout(() => setShowFeedback(true), 0);
+          setTimeout(() => {
+            setShowFeedback(true);
+            setShowAlert(true);
+          }, 0);
         }
       }
       
@@ -185,7 +197,7 @@ const Episode: React.FC<EpisodeProps> = ({
         </Alert>
       )}
       <div
-        className={`absolute bottom-2 left-2 transition-all bg-white text-default dark:bg-black border border-black dark:border-white rounded-md px-3 py-2 text-sm ${
+        className={`absolute bottom-2 left-2 transition-all bg-white text-default dark:bg-black border border-black rounded-md px-3 py-2 text-sm ${
           isAdmin ? "hover:border-primary dark:hover:border-white cursor-pointer" : ""
         }`}
         onClick={() => isAdmin && handleStartEditing()}
@@ -195,7 +207,7 @@ const Episode: React.FC<EpisodeProps> = ({
             <input
               ref={inputRef}
               type="text"
-              className="border w-20 rounded -bottom-[8px] -left-[12px] absolute px-2 py-[5px] text-center text-base bg-white dark:bg-black focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-white"
+              className="border font-bold w-20 rounded -bottom-[8px] -left-[12px] absolute px-2 py-[5px] text-center text-base bg-white dark:bg-black focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-white"
               value={tempEpisode}
               onChange={handleInputChange} // ✅ Use validated input handler
               onBlur={handleFinishEditing} // ✅ Trigger onStopEditing
@@ -203,7 +215,9 @@ const Episode: React.FC<EpisodeProps> = ({
               autoFocus
             />
           ) : (
-            <span className="font-normal">Episode {episode}</span>
+            <span className="font-normal">
+              Episode <span className="font-bold">{episode}</span>
+            </span>
           )}
           <FloatingText
             show={showFeedback}
@@ -212,6 +226,17 @@ const Episode: React.FC<EpisodeProps> = ({
           />
         </div>
       </div>
+
+      {/* Bottom-right toast notification */}
+      {showAlert && (
+        <div className="fixed bottom-4 right-4 rounded-lg shadow-lg z-50">
+          <Alert className="shadow-lg bg-accent">
+            <TriangleAlert className="absolute left-3 top-1/2 transform w-5 h-5" />
+            <AlertTitle>Saved!</AlertTitle>
+            <AlertDescription>Episode updated</AlertDescription>
+          </Alert>
+        </div>
+      )}
     </>
   );
 };

@@ -146,9 +146,9 @@ const MovieCard: React.FC<MovieCardProps> = ({
 
   return (
     <div className="relative p-4 border text-card-foreground rounded-lg shadow bg-card">
-      <h3 className="text-lg/5 pr-7 mb-3">
-        <strong>{movie.title}</strong>{" "}
-        <span className="text-xs">({movie.year || "n/a"})</span>
+      <h3 className="pr-7 mb-3">
+        <span className="text-2xl font-light">{movie.title}</span>{" "}
+        <span className="text-xs text-gray-500">({movie.year || "n/a"})</span>
       </h3>
 
       {movie.poster_url && (
@@ -182,7 +182,7 @@ const MovieCard: React.FC<MovieCardProps> = ({
             )}
           </div>
           {showUpvoteButton && canUpvote && !isAdmin && (
-            <Button onClick={handleUpvote} className="relative h-7 pr-8">
+            <Button onClick={handleUpvote} className="relative h-7 pr-8 text-black">
               Upvote
               <ArrowUp className="absolute right-3 transform w-5 h-5" />
             </Button>

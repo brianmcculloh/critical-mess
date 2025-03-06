@@ -4,6 +4,10 @@
 
 body {
   @apply font-sans; /* Apply the Rubik font */
+  /*background-image: url("/cmbg.webp");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;*/
 }
 
 @layer base {
@@ -14,9 +18,9 @@ body {
     --card-foreground: 240 10% 3.9%;
     --popover: 0 0% 100%;
     --popover-foreground: 240 10% 3.9%;
-    --primary: 346.8 77.2% 49.8%;
-    --primary-foreground: 355.7 100% 97.3%;
-    --primary-light: 347 40% 75%;
+    --primary: var(--yellow);
+    --primary-foreground: 17 100% 97%;
+    --primary-light: 17 40% 75%;
     --secondary: 240 4.8% 95.9%;
     --secondary-foreground: 240 5.9% 10%;
     --muted: 240 4.8% 95.9%;
@@ -34,6 +38,14 @@ body {
     --chart-3: 197 37% 24%;
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
+
+    --purple: 325 36% 31%;
+    --dark-red: 353 66% 44%;
+    --light-red: 356 60% 52%;
+    --orange: 17 64% 54%;
+    --yellow: 42 82% 56%;
+    --fresh: 346.8 77.2% 49.8%;
+    --rotten: 142 70.6% 45.3%;
   }
 
   .dark {
@@ -43,9 +55,9 @@ body {
     --card-foreground: 0 0% 95%;
     --popover: 0 0% 9%;
     --popover-foreground: 0 0% 95%;
-    --primary: 346.8 77.2% 49.8%;
-    --primary-foreground: 355.7 100% 97.3%;
-    --primary-light: 347 40% 75%;
+    --primary: var(--yellow);
+    --primary-foreground: 17 100% 97%;
+    --primary-light: 17 40% 75%;
     --secondary: 240 3.7% 15.9%;
     --secondary-foreground: 0 0% 98%;
     --muted: 0 0% 15%;
@@ -62,6 +74,14 @@ body {
     --chart-3: 30 80% 55%;
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 55%;
+
+    --purple: 325 36% 31%;
+    --dark-red: 353 66% 44%;
+    --light-red: 356 60% 52%;
+    --orange: 17 64% 54%;
+    --yellow: 42 82% 56%;
+    --fresh: 346.8 77.2% 49.8%;
+    --rotten: 142 70.6% 45.3%;
   }
 }
 

@@ -10,8 +10,8 @@ import { fetchMovies } from "@/lib/movieUtils";
 import { useRouter } from "next/navigation";
 import SuggestedMovies from "@/components/SuggestedMovies";
 import QueuedMovies from "@/components/QueuedMovies";
-import { Sparkles, Rocket } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import TopHundred from "@/components/TopHundred";
+import Insights from "@/components/Insights";
 import Tutorial from "@/components/Tutorial";
 
 interface Movie {
@@ -124,31 +124,21 @@ const HomePage: React.FC = () => {
   return (
     <>
       {showTutorial && <Tutorial onClose={() => setShowTutorial(false)} />}
-      <div className="flex gap-2 mt-4 pb-4 items-center">
+      <div className="flex gap-1 xs:gap-2 mt-2 xs:mt-4 pb-2 xs:pb-2items-center flex-wrap">
         <MovieSearchLocal onSearch={handleSearch} />
         <Sorting onSortChange={handleSortChange} currentSortKey={sortKey} currentSortOrder={sortOrder} />
-        <SuggestedMovies refreshKey={suggestedMoviesRefreshKey} />
-        <QueuedMovies refreshKey={refreshKey} />
-        <MovieSearchDialog
-          fetchMovies={() => fetchMovies(setMovies, setLoading)}
-          triggerRefresh={triggerRefresh}
-          triggerSuggestedMoviesRefresh={triggerSuggestedMoviesRefresh}
-          isAdmin={false}
-        />
-        <Button
-          onClick={() => router.push("/insights")}
-          className="transition-colors bg-secondary hover:bg-secondary/70 text-black dark:text-white"
-        >
-          Insights
-          <Sparkles className="transform w-5 h-5" />
-        </Button>
-        <Button
-          onClick={() => router.push("/tophundred")}
-          className="transition-colors bg-secondary hover:bg-secondary/70 text-black dark:text-white"
-        >
-          Top 100
-          <Rocket className="transform w-5 h-5" />
-        </Button>
+        <div className="flex gap-1 xs:gap-1 items-center flex-wrap">
+          <MovieSearchDialog
+            fetchMovies={() => fetchMovies(setMovies, setLoading)}
+            triggerRefresh={triggerRefresh}
+            triggerSuggestedMoviesRefresh={triggerSuggestedMoviesRefresh}
+            isAdmin={false}
+          />
+          <SuggestedMovies refreshKey={suggestedMoviesRefreshKey} />
+          <QueuedMovies refreshKey={refreshKey} />
+          <Insights />
+          <TopHundred />
+        </div>
       </div>
       {loading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">

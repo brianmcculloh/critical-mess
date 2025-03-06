@@ -57,7 +57,7 @@ export default function DeleteMovieModal({ movieTitle, onDelete, onClose }: Dele
               Cancel
             </button>
             <button
-              className="px-4 py-2 rounded-lg transition-colors bg-primary hover:bg-primary/70 text-primary-foreground"
+              className="px-4 py-2 rounded-lg transition-colors bg-primary hover:bg-primary/70 text-black"
               onClick={handleDelete}
               disabled={loading}
             >

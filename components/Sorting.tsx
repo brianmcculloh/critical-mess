@@ -69,7 +69,7 @@ const Sorting: React.FC<SortingProps> = ({
   };
 
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex items-center gap-1">
       {/* ✅ Dropdown for Sorting Options */}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
@@ -105,8 +105,8 @@ const Sorting: React.FC<SortingProps> = ({
                 onClick={() => handleSortOrderChange("desc")}
                 className={
                   sortOrder === "desc"
-                    ? "rounded-none bg-accent hover:bg-accent text-white"
-                    : "rounded-none bg-background hover:bg-accent"
+                    ? "rounded-none bg-accent hover:bg-accent text-white px-2 xs:px-4"
+                    : "rounded-none bg-background hover:bg-accent px-3 xs:px-4"
                 }
               >
                 <ArrowDownWideNarrow className="w-5 h-5 text-foreground" />
@@ -122,8 +122,8 @@ const Sorting: React.FC<SortingProps> = ({
                 onClick={() => handleSortOrderChange("asc")}
                 className={
                   sortOrder === "asc"
-                    ? "rounded-none bg-accent hover:bg-accent text-white"
-                    : "rounded-none bg-background hover:bg-accent"
+                    ? "rounded-none bg-accent hover:bg-accent text-white px-2 xs:px-4"
+                    : "rounded-none bg-background hover:bg-accent px-3 xs:px-4"
                 }
               >
                 <ArrowUpNarrowWide className="w-5 h-5 text-foreground" />

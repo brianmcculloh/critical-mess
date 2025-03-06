@@ -1,3 +1,4 @@
-Admins shouldn't be able to add the same movie twice
-Make top 100 and insights open in a dialog like the suggested movies and queue do
+Supabase backups - requires $25 per month pro plan
+Responsive - insights, moviesearchdialog
+Add search to admin page
 Achievements and badges to gamify it

@@ -137,7 +137,7 @@ const ScoresDisplay: React.FC<ScoresDisplayProps> = ({
 
   const getAvgRatingColorClass = () => {
     if (avgUserRating === null) return "text-black/40 dark:text-white/40";
-    return avgUserRating < 60 ? "text-green-500" : "text-primary";
+    return avgUserRating < 60 ? "text-rotten" : "text-fresh";
   };
 
   return (

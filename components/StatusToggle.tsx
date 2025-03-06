@@ -13,7 +13,7 @@ interface StatusToggleProps {
 
 const StatusToggle: React.FC<StatusToggleProps> = ({ status, onToggle }) => {
   return (
-    <div className="flex items-center gap-3">
+    <div className="flex items-center gap-1 xs:gap-2">
       <Label htmlFor="status-toggle" className="text-sm font-medium">
         Queue
       </Label>
@@ -27,7 +27,7 @@ const StatusToggle: React.FC<StatusToggleProps> = ({ status, onToggle }) => {
                    [&>span]:translate-x-0 data-[state=checked]:[&>span]:translate-x-4
                    dark:data-[state=unchecked]:bg-accent dark:border-accent dark:[&>span]:bg-black"
       />
-      <Label className="text-sm font-medium">Episodes</Label>
+      <Label className="text-sm font-medium"><span className="block xs:hidden">Ep.</span><span className="hidden xs:block">Episodes</span></Label>
     </div>
   );
 };

@@ -20,6 +20,10 @@ const LoginPage = () => {
     }
   }, [user, router]);
 
+  const handleBackHome = async () => {
+    router.push("/");
+  };
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -83,9 +87,15 @@ const LoginPage = () => {
       </form>
       <button
         onClick={handleForgotPassword}
-        className="mt-4 text-sm text-blue-500 hover:underline"
+        className="mt-4 text-sm hover:underline"
       >
         Forgot Password?
+      </button>
+      <button
+        onClick={handleBackHome}
+        className="mt-4 text-sm hover:underline"
+      >
+        &larr; Back To Homepage
       </button>
     </div>
   );

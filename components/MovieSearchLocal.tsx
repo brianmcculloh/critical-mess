@@ -31,17 +31,17 @@ const MovieSearchLocal: React.FC<MovieSearchLocalProps> = ({ onSearch }) => {
   };
 
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex items-center gap-2 w-full xs:w-80">
       {/* Search input wrapper */}
-      <div className="relative">
+      <div className="relative w-full">
         {/* Search icon */}
         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5" />
         
         {/* Input field with padding to accommodate icon */}
         <input
           type="text"
-          className="border rounded w-96 p-2 pl-10 focus:outline-none"
-          placeholder="Search movies..."
+          className="border rounded w-full p-2 pl-10 focus:outline-none"
+          placeholder="Search our episodes..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           onKeyDown={handleKeyDown}

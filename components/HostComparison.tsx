@@ -65,8 +65,8 @@ const HostComparison: React.FC<HostComparisonProps> = ({ title, description, dat
     .map(item => ({
     ...item,
     color: isDisparity
-      ? (item.value < 0 ? "#22c55e" : "hsl(var(--primary))")
-      : "#777777",
+      ? (item.value < 0 ? "hsl(var(--rotten))" : "hsl(var(--fresh))")
+      : "hsl(var(--yellow))",
   }));
 
   return (

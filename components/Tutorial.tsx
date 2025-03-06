@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import MovieCard from "@/components/MovieCard";
 import { supabase } from "@/lib/supabaseClient";
 import SpeechBubble from "@/components/SpeechBubble";
+import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/ui/tooltip";
 
 interface Movie {
   id: number;
@@ -19,7 +20,7 @@ interface Movie {
   brian_rating?: number | null;
   gris_rating?: number | null;
   ben_rating?: number | null;
-  suggestion_count?: number | null; // Fetched data may be undefined or null.
+  suggestion_count?: number | null;
   status?: string;
   episode?: number | null;
 }
@@ -54,35 +55,42 @@ const Tutorial: React.FC<TutorialProps> = ({ onClose }) => {
     <Dialog open onOpenChange={(open) => { if (!open) onClose(); }}>
       <DialogContent className="max-h-screen">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-bold">Welcome to the Critical Mess Hall!</DialogTitle>
+          <DialogTitle className="text-2xl font-bold">Welcome to the Mess Hall!</DialogTitle>
           <DialogDescription>
-            Every episode has its own movie card&mdash;rate the film and pick the host you most resonated with! Here's an example episode:
+            Every episode has its own movie card&mdash;rate the film and pick the host you most resonated with! Here's an example:
           </DialogDescription>
         </DialogHeader>
         {exampleMovie ? (
-        <div className="grid custom-grid gap-4 relative">
-            {/* Render a static, non-editable MovieCard.
-                We map the movie so that suggestion_count and status have default values */}
-            <MovieCard 
-            movie={{
-                ...exampleMovie,
-                suggestion_count: exampleMovie.suggestion_count ?? 0,
-                status: exampleMovie.status ?? "episode",
-            }} 
-            editable={true} 
-            disabled={true}
-            />
-            
+          <div className="grid custom-grid gap-4 relative">
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="cursor-not-allowed">
+                    <MovieCard 
+                      movie={{
+                        ...exampleMovie,
+                        suggestion_count: exampleMovie.suggestion_count ?? 0,
+                        status: exampleMovie.status ?? "episode",
+                      }} 
+                      editable={true} 
+                      disabled={true}
+                    />
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent className="bg-white text-black text-2xl font-bold" side="top" sideOffset={-160}>
+                  <span>This is just an example.<br />Click "Got It!" when you're ready.</span>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
             <div className="absolute top-[465px] -left-[150px]">
-                <SpeechBubble message="Add your score here!" arrowDirection="right" />
+              <SpeechBubble message="Add your score here!" arrowDirection="right" />
             </div>
             <div className="absolute top-[544px] -right-[315px]">
-                <SpeechBubble message="Pick which host you liked most!" arrowDirection="left" />
+              <SpeechBubble message="Pick which host you liked most!" arrowDirection="left" />
             </div>
-
-        </div>
+          </div>
         ) : (
-        <p>Loading example movie...</p>
+          <p>Loading example movie...</p>
         )}
         <div className="mt-2 flex justify-end absolute bottom-[10px] right-[10px]">
           <Button onClick={onClose} className="text-lg font-bold">Got it!</Button>

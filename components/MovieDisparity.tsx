@@ -115,7 +115,7 @@ const MovieDisparity: React.FC = () => {
                   {movieData.map((entry, index) => (
                     <Cell
                       key={`cell-${index}`}
-                      fill={`hsl(0, 0%, ${Math.max(
+                      fill={`hsl(42, 82%, ${Math.max(
                         20,
                         49.8 - (index * (30 / movieData.length))
                       )}%)`}

@@ -8,9 +8,9 @@ import MovieCard from "@/components/MovieCard";
 import SuggestedMovies from "@/components/SuggestedMovies";
 import Sorting from "@/components/Sorting";
 import StatusToggle from "@/components/StatusToggle";
+import Insights from "@/components/Insights";
 import { fetchMovies } from "@/lib/movieUtils";
-import { Sparkles } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import TopHundred from "@/components/TopHundred";
 
 interface Movie {
   id: number;
@@ -101,29 +101,26 @@ const AdminPage: React.FC = () => {
 
   return (
     <>
-      <div className="flex gap-4 items-center">
-        <MovieSearchDialog
-          fetchMovies={refreshMovies}
-          triggerRefresh={triggerRefresh}
-          isAdmin={true}
-        />
-        <StatusToggle status={viewStatus} onToggle={setViewStatus} /> {/* ✅ Add Toggle */}
+      <div className="flex gap-2 items-center flex-wrap">
         <Sorting
           onSortChange={handleSortChange}
           currentSortKey={sortKey}
           currentSortOrder={sortOrder}
         />
-        <SuggestedMovies refreshKey={refreshKey} />
-        <Button
-          onClick={() => router.push("/insights")}
-          className="transition-colors bg-secondary hover:bg-secondary/70 text-black dark:text-white"
-        >
-          Insights
-          <Sparkles className="transform w-5 h-5" />
-        </Button>
+        <StatusToggle status={viewStatus} onToggle={setViewStatus} />
+        <div className="flex gap-1 xs:gap-1 items-center flex-wrap">
+          <MovieSearchDialog
+            fetchMovies={refreshMovies}
+            triggerRefresh={triggerRefresh}
+            isAdmin={true}
+          />
+          <SuggestedMovies refreshKey={refreshKey} />
+          <Insights />
+          <TopHundred />
+        </div>
       </div>
 
-      <div className="relative mt-4">
+      <div className="relative mt-2 xs:mt-4">
         {isAddingMovie && (
           <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center z-10 pointer-events-none">
             <p className="text-white font-semibold">Adding movie...</p>

@@ -8,8 +8,8 @@ import Header from "@/components/Header";
 
 const rubik = Rubik({
   subsets: ["latin"],
-  weight: ["300", "400", "500", "700", "900"], // Choose the weights you need
-  variable: "--font-rubik", // Set a CSS variable for easy use in Tailwind
+  weight: ["300", "400", "500", "700", "900"],
+  variable: "--font-rubik",
 });
 
 const geistSans = Geist({
@@ -23,27 +23,38 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Critical Mess Hall",
-  description: "Companion app to the Critical Mess Podcast",
+  title: "The Critical Mess Hall",
+  description: "The official companion app for the Critical Mess Podcast",
 };
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
     <AuthProvider>
       <html lang="en" className={rubik.variable}>
         <body
-          className={`${geistSans.variable} ${geistMono.variable} antialiased font-sans`}
+          className={`${geistSans.variable} ${geistMono.variable} antialiased font-sans relative`}
         >
+          <div
+            className="fixed top-0 left-0 pointer-events-none -z-10 w-[240px] h-[240px] 
+              bg-[linear-gradient(135deg,#6a3253_0%,#6a3253_10%,#b92638_10%,#b92638_20%,#ce3b45_20%,#ce3b45_30%,#d5693f_30%,#d5693f_40%,#ebb533_40%,#ebb533_50%,#ffffff_50%,#ffffff_100%)]
+              dark:bg-[linear-gradient(135deg,#6a3253_0%,#6a3253_10%,#b92638_10%,#b92638_20%,#ce3b45_20%,#ce3b45_30%,#d5693f_30%,#d5693f_40%,#ebb533_40%,#ebb533_50%,hsl(20,14.3%,4.1%)_50%,hsl(20,14.3%,4.1%)_100%)]"
+          />
+
+          {/* COLORS REVERSED
+          <div
+            className="fixed top-0 left-0 pointer-events-none -z-10 w-[250px] h-[250px] 
+            bg-[linear-gradient(135deg,#ebb533_0%,#ebb533_10%,#d5693f_10%,#d5693f_20%,#ce3b45_20%,#ce3b45_30%,#b92638_30%,#b92638_40%,#6a3253_40%,#6a3253_50%,#ffffff_50%,#ffffff_100%)]
+            dark:bg-[linear-gradient(135deg,#ebb533_0%,#ebb533_10%,#d5693f_10%,#d5693f_20%,#ce3b45_20%,#ce3b45_30%,#b92638_30%,#b92638_40%,#6a3253_40%,#6a3253_50%,hsl(20,14.3%,4.1%)_50%,hsl(20,14.3%,4.1%)_100%)]"
+          /> */}
+
           <ThemeProvider>
-            <div className="container mx-auto max-w-[1600px] px-4">
-              <div className="p-6">
-                <Header />
-                {children}
-              </div>
+            <div className="container mx-auto max-w-[1600px] py-3 px-4 lg:py-6 lg:px-8">
+              <Header />
+              {children}
             </div>
           </ThemeProvider>
         </body>

@@ -81,7 +81,7 @@ const QueuedMovies: React.FC<{ refreshKey: number }> = ({ refreshKey }) => {
           <Tooltip>
             <TooltipTrigger asChild>
               <DialogTrigger asChild>
-                <Button variant="outline" className="relative h-10">
+                <Button variant="outline" className="relative h-10 px-3 xs:px-4">
                   <SquareChartGantt className="transform !w-5 !h-5" />
                 </Button>
               </DialogTrigger>

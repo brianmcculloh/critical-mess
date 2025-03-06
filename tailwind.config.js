@@ -7,6 +7,18 @@ module.exports = {
   ],
   theme: {
   	extend: {
+		keyframes: {
+			shimmer: {
+				'0%': { backgroundPosition: '-200%' },
+				'100%': { backgroundPosition: '200%' },
+			},
+		},
+		animation: {
+			shimmer: 'shimmer 3s linear infinite',
+		},
+		backgroundSize: {
+			'200%': '200%',
+		},
   		borderRadius: {
   			lg: 'var(--radius)',
   			md: 'calc(var(--radius) - 2px)',
@@ -56,10 +68,20 @@ module.exports = {
   				'3': 'hsl(var(--chart-3))',
   				'4': 'hsl(var(--chart-4))',
   				'5': 'hsl(var(--chart-5))'
-  			}
+  			},
+			fresh: 'hsl(var(--fresh))',
+			rotten: 'hsl(var(--rotten))',
+			purple: 'hsl(var(--purple))',
+			darkRed: 'hsl(var(--dark-red))',
+			lightRed: 'hsl(var(--light-red))',
+			orange: 'hsl(var(--orange))',
+			yellow: 'hsl(var(--yellow))',
   		},
 		fontFamily: {
 			sans: ["var(--font-rubik)", "sans-serif"],
+		},
+		screens: {
+			xs: '600px',
 		},
   	}
   },

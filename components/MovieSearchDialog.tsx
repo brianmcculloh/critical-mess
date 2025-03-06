@@ -15,36 +15,21 @@ import { TriangleAlert, Clapperboard, Check, ThumbsUp } from "lucide-react";
 import MovieSearch from "@/components/MovieSearch";
 import MovieCard from "@/components/MovieCard";
 import { supabase } from "@/lib/supabaseClient";
+import { useAuth } from "@/contexts/AuthContext";
 
+// Environment variables remain unchanged
 const OMDB_API_KEY = process.env.NEXT_PUBLIC_OMDB_API_KEY;
 const OMDB_API_URL = "http://www.omdbapi.com/";
 
-interface Movie {
-  id: number;
-  title: string;
-  release_date?: string;
-  year?: number;
-  poster_url?: string;
-  backdrop_path?: string;
-  critic_rating?: number | null;
-  audience_rating?: number | null;
-  user_rating?: number | null;
-  user_selected_host?: string | null;
-  created_at?: string;
-  suggestion_count?: number | null;
-  status?: string;
-  episode?: number;
-}
-
+// Extend the props to include an optional flag indicating we're coming from TopHundred.
 interface MovieSearchDialogProps {
   fetchMovies: () => Promise<void>;
   triggerRefresh: () => void;
   triggerSuggestedMoviesRefresh?: () => void;
   isAdmin: boolean;
   selectedHost?: string;
+  fromTopHundred?: boolean; // new flag
 }
-
-import { usePathname } from 'next/navigation';
 
 const MovieSearchDialog: React.FC<MovieSearchDialogProps> = ({
   fetchMovies,
@@ -52,9 +37,10 @@ const MovieSearchDialog: React.FC<MovieSearchDialogProps> = ({
   triggerSuggestedMoviesRefresh,
   isAdmin,
   selectedHost,
+  fromTopHundred = false, // default false if not provided
 }) => {
   const [showOverlay, setShowOverlay] = useState(false);
-  const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null);
+  const [selectedMovie, setSelectedMovie] = useState<any | null>(null);
   const [stagedEpisode, setStagedEpisode] = useState<number>(0);
   const [showDuplicateAlert, setShowDuplicateAlert] = useState(false);
   const [showAlreadyExistsAlert, setShowAlreadyExistsAlert] = useState(false);
@@ -62,6 +48,7 @@ const MovieSearchDialog: React.FC<MovieSearchDialogProps> = ({
   const [showHostMovieExistsAlert, setShowHostMovieExistsAlert] = useState(false);
   const [showSuccessAlert, setShowSuccessAlert] = useState(false);
   const [isEditingEpisode, setIsEditingEpisode] = useState(false);
+  const { user } = useAuth();
 
   useEffect(() => {
     if (showSuccessAlert) {
@@ -70,7 +57,7 @@ const MovieSearchDialog: React.FC<MovieSearchDialogProps> = ({
     }
   }, [showSuccessAlert]);
 
-  const handleMovieSelection = (movie: Movie) => {
+  const handleMovieSelection = (movie: any) => {
     setSelectedMovie({
       ...movie,
       episode: stagedEpisode,
@@ -94,13 +81,12 @@ const MovieSearchDialog: React.FC<MovieSearchDialogProps> = ({
     }
   };
 
-  const pathname = usePathname();
-
   const handleAddMovie = async () => {
     if (!selectedMovie) return;
       
     try {
-      if (pathname === "/tophundred") {
+      if (fromTopHundred) {
+        // Logic for TopHundred:
         // Fetch existing movies for the selected host (fetch title and rank)
         const { data: existingMovies, error: fetchError } = await supabase
           .from("top_hundred_movies")
@@ -150,50 +136,34 @@ const MovieSearchDialog: React.FC<MovieSearchDialogProps> = ({
         setSelectedMovie(null);
         setShowOverlay(false);
         return;
-
       } else {
+        // Normal (suggestion) flow:
+        // Use user.id (UUID) for admin and fallback to localStorage for non-admins
+        const clientId = isAdmin ? user?.id : localStorage.getItem("client_id");
+        if (!clientId) throw new Error("Client ID not found");
 
-        const clientId = localStorage.getItem("client_id");
-        if (!clientId && !isAdmin) throw new Error("Client ID not found");
-    
-        // ✅ 1. Check if the movie already exists as an episode (for both admin and non-admin)
-        const { data: existingEpisodes, error: episodeFetchError } = await supabase
+        // 1. Check if the movie already exists for this user (whether as an episode or a suggestion)
+        const { data: existingMovie, error: movieFetchError } = await supabase
           .from("movies")
           .select("id")
           .eq("title", selectedMovie.title)
-          .eq("status", "episode");
+          .eq("client_id", clientId);
 
-        if (episodeFetchError) throw episodeFetchError;
+        if (movieFetchError) throw movieFetchError;
 
-        if (existingEpisodes && existingEpisodes.length > 0) {
-          setShowAlreadyExistsAlert(true);
-          setTimeout(() => setShowAlreadyExistsAlert(false), 4000);
+        if (existingMovie && existingMovie.length > 0) {
+          setShowDuplicateAlert(true);
+          setTimeout(() => setShowDuplicateAlert(false), 4000);
           return;
         }
 
-        // ✅ 2. If NOT admin, check for duplicate suggestions
-        if (!isAdmin) {
-          const { data: existingSuggestions, error: suggestionFetchError } = await supabase
-            .from("movies")
-            .select("id")
-            .eq("title", selectedMovie.title)
-            .eq("status", "suggested")
-            .eq("client_id", clientId);
-
-          if (suggestionFetchError) throw suggestionFetchError;
-
-          if (existingSuggestions && existingSuggestions.length > 0) {
-            setShowDuplicateAlert(true);
-            setTimeout(() => setShowDuplicateAlert(false), 4000);
-            return;
-          }
-        }
-
+        // 2. If admin, fetch critic rating
         let criticRating = null;
         if (isAdmin) {
           criticRating = await fetchCriticRating(selectedMovie.title);
         }
-    
+
+        // 3. Prepare the movieData payload
         const movieData = {
           id: selectedMovie.id,
           title: selectedMovie.title,
@@ -207,13 +177,14 @@ const MovieSearchDialog: React.FC<MovieSearchDialogProps> = ({
           audience_rating: null,
           episode: stagedEpisode,
           created_at: new Date().toISOString(),
-          client_id: !isAdmin ? clientId : null,
+          client_id: clientId,
           status: isAdmin ? (stagedEpisode > 0 ? "episode" : "queue") : "suggested",
         };
-    
+
+        // 4. Insert the new movie record
         const { data, error } = await supabase.from("movies").insert([movieData]).select();
         if (error) throw error;
-    
+
         if (data && data.length > 0) {
           // If admin adds a movie with "episode" status,
           // delete all other rows with a matching movie id (using "id")
@@ -261,7 +232,7 @@ const MovieSearchDialog: React.FC<MovieSearchDialogProps> = ({
 
       <Dialog open={showOverlay} onOpenChange={setShowOverlay}>
         <DialogTrigger asChild>
-          <Button onClick={() => setShowOverlay(true)}>
+          <Button onClick={() => setShowOverlay(true)} className="text-black dark:drop-shadow-lg">
             {isAdmin ? "Add a Movie" : "Suggest a Movie"}
             <Clapperboard className="transform w-5 h-5" />
           </Button>
@@ -332,16 +303,16 @@ const MovieSearchDialog: React.FC<MovieSearchDialogProps> = ({
                   showHostRatings={false}
                   showUserRatings={false} 
                   showDelete={false}
+                  showEpisode={fromTopHundred ? false : true}
                   skipEpisodeDatabaseSave={true}
                   onEpisodeChange={setStagedEpisode}
-                  onStartEpisodeEdit={() => setIsEditingEpisode(true)}   // ✅ New prop
-                  onStopEpisodeEdit={() => setIsEditingEpisode(false)}   // ✅ New prop
+                  onStartEpisodeEdit={() => setIsEditingEpisode(true)}
+                  onStopEpisodeEdit={() => setIsEditingEpisode(false)}
                 />
-                <Button onClick={handleAddMovie} className="mt-4 transition" disabled={isEditingEpisode}>
-                  {pathname === "/tophundred" ? "Add To List" : isAdmin ? "Add This Movie" : "Suggest This"}
+                <Button onClick={handleAddMovie} className="mt-4 transition text-black" disabled={isEditingEpisode}>
+                  {fromTopHundred ? "Add To List" : isAdmin ? "Add This Movie" : "Suggest This"}
                   <Check className="transform w-5 h-5" />
                 </Button>
-
               </div>
             )}
           </div>
