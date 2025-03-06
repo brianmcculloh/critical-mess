@@ -49,6 +49,8 @@ const MovieSearchDialog: React.FC<MovieSearchDialogProps> = ({
   const [showSuccessAlert, setShowSuccessAlert] = useState(false);
   const [isEditingEpisode, setIsEditingEpisode] = useState(false);
   const { user } = useAuth();
+  const [addingMovie, setAddingMovie] = useState(false);
+
 
   useEffect(() => {
     if (showSuccessAlert) {
@@ -83,6 +85,7 @@ const MovieSearchDialog: React.FC<MovieSearchDialogProps> = ({
 
   const handleAddMovie = async () => {
     if (!selectedMovie) return;
+    setAddingMovie(true);
       
     try {
       if (fromTopHundred) {
@@ -138,36 +141,30 @@ const MovieSearchDialog: React.FC<MovieSearchDialogProps> = ({
         return;
       } else {
         // Normal (suggestion) flow:
-        // Use user.id (UUID) for admin and fallback to localStorage for non-admins
         const clientId = isAdmin ? user?.id : localStorage.getItem("client_id");
         if (!clientId) throw new Error("Client ID not found");
 
-        // 1. Check if the movie already exists for this user (whether as an episode or a suggestion)
+        // 1. Check if the movie already exists for this user.
         const { data: existingMovie, error: movieFetchError } = await supabase
           .from("movies")
           .select("id")
           .eq("title", selectedMovie.title)
           .eq("client_id", clientId);
-
         if (movieFetchError) throw movieFetchError;
-
         if (existingMovie && existingMovie.length > 0) {
           setShowDuplicateAlert(true);
           setTimeout(() => setShowDuplicateAlert(false), 4000);
           return;
         }
 
-        // 2. If admin, fetch critic rating
+        // 2. If admin, fetch critic rating.
         let criticRating = null;
         if (isAdmin) {
           criticRating = await fetchCriticRating(selectedMovie.title);
         }
 
         // 3. Get the audience (popcornmeter) score via your scraper.
-        // You need the Rotten Tomatoes URL for the movie. 
-        // You might construct this from selectedMovie data; for example:
         const rtUrl = selectedMovie.rtUrl || `https://www.rottentomatoes.com/m/${selectedMovie.title.toLowerCase().replace(/\s+/g, '_')}`;
-
         let audienceRating = null;
         try {
           const res = await fetch(`/api/scrape-popcorn?movieUrl=${encodeURIComponent(rtUrl)}`);
@@ -179,7 +176,7 @@ const MovieSearchDialog: React.FC<MovieSearchDialogProps> = ({
           console.error("Error fetching audience score:", err);
         }
 
-        // 3. Prepare the movieData payload
+        // 4. Prepare the movieData payload.
         const movieData = {
           id: selectedMovie.id,
           title: selectedMovie.title,
@@ -197,14 +194,11 @@ const MovieSearchDialog: React.FC<MovieSearchDialogProps> = ({
           status: isAdmin ? (stagedEpisode > 0 ? "episode" : "queue") : "suggested",
         };
 
-        // 4. Insert the new movie record
+        // 5. Insert the new movie record.
         const { data, error } = await supabase.from("movies").insert([movieData]).select();
         if (error) throw error;
 
         if (data && data.length > 0) {
-          // If admin adds a movie with "episode" status,
-          // delete all other rows with a matching movie id (using "id")
-          // but keep the newly inserted row (matching movie_instance_id).
           if (isAdmin && movieData.status === "episode") {
             const insertedRow = data[0];
             const { error: deleteError } = await supabase
@@ -229,8 +223,10 @@ const MovieSearchDialog: React.FC<MovieSearchDialogProps> = ({
       }
     } catch (error: any) {
       console.error("🚨 Error adding movie:", error?.message || error);
+    } finally {
+      setAddingMovie(false);
     }
-  };  
+  };
   
   return (
     <>
@@ -325,10 +321,20 @@ const MovieSearchDialog: React.FC<MovieSearchDialogProps> = ({
                   onStartEpisodeEdit={() => setIsEditingEpisode(true)}
                   onStopEpisodeEdit={() => setIsEditingEpisode(false)}
                 />
-                <Button onClick={handleAddMovie} className="mt-4 transition text-black" disabled={isEditingEpisode}>
-                  {fromTopHundred ? "Add To List" : isAdmin ? "Add This Movie" : "Suggest This"}
+                <Button 
+                  onClick={handleAddMovie} 
+                  className="mt-4 transition text-black" 
+                  disabled={isEditingEpisode || addingMovie}
+                >
+                  {fromTopHundred 
+                    ? "Add To List" 
+                    : isAdmin 
+                      ? (addingMovie ? "Loading..." : "Add This Movie") 
+                      : (addingMovie ? "Loading..." : "Suggest This")
+                  }
                   <Check className="transform w-5 h-5" />
                 </Button>
+
               </div>
             )}
           </div>
