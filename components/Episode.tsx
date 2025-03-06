@@ -115,8 +115,8 @@ const Episode: React.FC<EpisodeProps> = ({
         setEditing(false);
         return;
       }
-
-      // Check for duplicate episode numbers
+  
+      // Check for duplicate episode numbers (existing logic)
       if (numericValue > 0) {
         const { data, error } = await supabase
           .from("movies")
@@ -135,16 +135,20 @@ const Episode: React.FC<EpisodeProps> = ({
           }
         }
       }
-
-      // Update state after passing validation
+  
+      // Save the new episode value locally
+      const oldValue = Number(originalEpisode);
       setEpisode(numericValue);
       setOriginalEpisode(tempEpisode);
       setEditing(false);
-
-      if (onEpisodeChange) {
-        onEpisodeChange(numericValue);
+  
+      // Only trigger the parent re-render (via onEpisodeChange)
+      // if the episode transitions between 0 and non-zero.
+      if ((oldValue === 0 && numericValue !== 0) || (oldValue !== 0 && numericValue === 0)) {
+        if (onEpisodeChange) onEpisodeChange(numericValue);
       }
-
+  
+      // Database update
       if (!skipDatabaseSave && movieId) {
         const updateData: UpdateData = { episode: numericValue, status: "episode" };
         if (numericValue === 0) updateData.status = "queue";
@@ -153,25 +157,25 @@ const Episode: React.FC<EpisodeProps> = ({
           .from("movies")
           .update(updateData)
           .eq("id", movieId)
-          .select(); // ✅ Select updated row for reference
+          .select(); // Select updated row for reference
       
         if (updateError) {
           console.error("❌ Error updating episode:", updateError);
         } else {
-          // ✅ If updated movie's status is "episode", delete all others with the same ID
+          // If updated movie's status is "episode", delete duplicates as needed.
           if (updateData.status === "episode" && updatedMovie && updatedMovie.length > 0) {
             const { error: deleteError } = await supabase
               .from("movies")
               .delete()
               .eq("id", movieId)
-              .neq("movie_instance_id", updatedMovie[0].movie_instance_id); // ✅ Keep the updated row
+              .neq("movie_instance_id", updatedMovie[0].movie_instance_id);
       
             if (deleteError) {
               console.error("❌ Error deleting duplicate episodes:", deleteError);
             }
             if (triggerSuggestedMoviesRefresh) triggerSuggestedMoviesRefresh();
           }
-          // Trigger the FloatingText and the bottom-right toast alert
+          // Trigger the FloatingText and bottom-right toast notification.
           setShowFeedback(false);
           setTimeout(() => {
             setShowFeedback(true);
@@ -179,11 +183,10 @@ const Episode: React.FC<EpisodeProps> = ({
           }, 0);
         }
       }
-      
     } else {
       setEditing(false); // Close input if invalid
     }
-  };
+  };  
 
   if (episode === 0 && !isAdmin) return null;
 

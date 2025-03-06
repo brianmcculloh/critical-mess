@@ -163,6 +163,22 @@ const MovieSearchDialog: React.FC<MovieSearchDialogProps> = ({
           criticRating = await fetchCriticRating(selectedMovie.title);
         }
 
+        // 3. Get the audience (popcornmeter) score via your scraper.
+        // You need the Rotten Tomatoes URL for the movie. 
+        // You might construct this from selectedMovie data; for example:
+        const rtUrl = selectedMovie.rtUrl || `https://www.rottentomatoes.com/m/${selectedMovie.title.toLowerCase().replace(/\s+/g, '_')}`;
+
+        let audienceRating = null;
+        try {
+          const res = await fetch(`/api/scrape-popcorn?movieUrl=${encodeURIComponent(rtUrl)}`);
+          const json = await res.json();
+          if (json && json.audienceScore) {
+            audienceRating = Number(json.audienceScore);
+          }
+        } catch (err) {
+          console.error("Error fetching audience score:", err);
+        }
+
         // 3. Prepare the movieData payload
         const movieData = {
           id: selectedMovie.id,
@@ -174,7 +190,7 @@ const MovieSearchDialog: React.FC<MovieSearchDialogProps> = ({
             ? `https://image.tmdb.org/t/p/w500${selectedMovie.backdrop_path}`
             : selectedMovie.poster_url || null,
           critic_rating: isAdmin ? criticRating : null,
-          audience_rating: null,
+          audience_rating: audienceRating,
           episode: stagedEpisode,
           created_at: new Date().toISOString(),
           client_id: clientId,

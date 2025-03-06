@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import Image from "next/image";
 import HostSelector from "@/components/HostSelector";
 import HeatMeter from "@/components/HeatMeter";
 import ScoresDisplay from "@/components/ScoresDisplay";
@@ -12,6 +11,7 @@ import { supabase } from "@/lib/supabaseClient";
 import { usePathname } from "next/navigation";
 import { ArrowUp } from "lucide-react";
 import Episode from "@/components/Episode";
+import MovieLink from "@/components/MovieLink";
 
 interface Movie {
   id: number;
@@ -153,13 +153,7 @@ const MovieCard: React.FC<MovieCardProps> = ({
 
       {movie.poster_url && (
         <div className="relative mt-2 rounded-lg w-full">
-          <Image
-            src={movie.poster_url}
-            alt={movie.title}
-            width={500}
-            height={400}
-            className="mt-2 rounded-lg w-full"
-          />
+          <MovieLink movie={movie} isAdmin={isAdmin} onUrlUpdate={() => {/* Optionally refresh or update state */}} />
           {showEpisode && (
             <Episode 
               movieId={movie.id} 
