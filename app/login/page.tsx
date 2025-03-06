@@ -15,7 +15,7 @@ const LoginPage = () => {
 
   // If already logged in, redirect to admin automatically
   useEffect(() => {
-    if (user) {
+    if (user && user.isAdmin) {
       router.push("/admin");
     }
   }, [user, router]);
