@@ -164,19 +164,18 @@ const AdminPage: React.FC = () => {
             }`}
           >
             {filteredMovies.map((movie) => (
-              <div key={movie.id} className="relative">
-                <MovieCard
-                  movie={{
-                    ...movie,
-                    suggestion_count: movie.suggestion_count ?? 0,
-                    status: movie.status ?? ""
-                  }}
-                  editable={true}
-                  onDelete={refreshMovies}
-                  onEpisodeChange={triggerRefresh}
-                  showDelete={true}
-                />
-              </div>
+              <MovieCard
+                key={movie.id}
+                movie={{
+                  ...movie,
+                  suggestion_count: movie.suggestion_count ?? 0,
+                  status: movie.status ?? ""
+                }}
+                editable={true}
+                onDelete={refreshMovies}
+                onEpisodeChange={triggerRefresh}
+                showDelete={true}
+              />
             ))}
           </div>
         ) : (

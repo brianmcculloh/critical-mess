@@ -148,7 +148,7 @@ const MovieCard: React.FC<MovieCardProps> = ({
     <div className="relative p-4 border text-card-foreground rounded-lg shadow bg-card">
       <h3 className="pr-7 mb-3">
         <span className="text-2xl font-light">{movie.title}</span>{" "}
-        <span className="text-xs text-gray-500">({movie.year || "n/a"})</span>
+        {/*<span className="text-xs text-gray-500">({movie.year || "n/a"})</span>*/}
       </h3>
 
       {movie.poster_url && (
