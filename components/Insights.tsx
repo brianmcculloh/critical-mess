@@ -141,7 +141,7 @@ const InsightsPage: React.FC = () => {
             <>
               <HostComparison
                 title="Benevolence Meter"
-                description="Each host's combined average rating for all episodes."
+                description="Combined average rating for all episodes, by host."
                 dataKey="average_rating"
                 data={hostAnalytics.map((host) => ({
                   host_name: host.host_name,
@@ -152,7 +152,7 @@ const InsightsPage: React.FC = () => {
 
               <HostComparison
                 title="Critic Alignment"
-                description="Another name for this chart: Pretentious Meter."
+                description="How far above or below is each host to the Tomatometer? Smaller number equals greater alignment."
                 dataKey="tomatometer_alignment"
                 data={hostAnalytics.map((host) => ({
                   host_name: host.host_name,
@@ -164,7 +164,7 @@ const InsightsPage: React.FC = () => {
 
               <HostComparison
                 title="Popcorn People Alignment"
-                description="See how deeply each of us resonates with the common idiot."
+                description="How far above or below is each host to the Popcornmeter? Smaller number equals greater alignment."
                 dataKey="popcornmeter_alignment"
                 data={hostAnalytics.map((host) => ({
                   host_name: host.host_name,
@@ -176,7 +176,7 @@ const InsightsPage: React.FC = () => {
 
               <HostComparison
                 title="Listener Alignment"
-                description="This is the most important chart we have. We love you."
+                description="How far above or below is each host to our listeners? Smaller number equals greater alignment."
                 dataKey="user_alignment"
                 data={hostAnalytics.map((host) => ({
                   host_name: host.host_name,

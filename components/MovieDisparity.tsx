@@ -100,7 +100,7 @@ const MovieDisparity: React.FC = () => {
                 <YAxis
                   type="category"
                   dataKey="title"
-                  tick={{ fill: axisColor }}
+                  tick={{ fill: axisColor, fontSize: '13px' }}
                   width={150}
                 />
                 <Tooltip
