@@ -1,9 +1,20 @@
+"use client";
+
 import React, { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Cell } from "recharts";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+  CartesianGrid,
+  Cell,
+} from "recharts";
 import { useTheme } from "next-themes";
 import { supabase } from "@/lib/supabaseClient";
-import { TrendingUp, TrendingDown } from "lucide-react";
+import { TrendingUp, TrendingDown, Check } from "lucide-react";
 
 interface TopTenProps {
   host: "nick" | "brian" | "gris" | "ben";
@@ -15,7 +26,9 @@ const TopTen: React.FC<TopTenProps> = ({ host, showLowest = false }) => {
     if (active && payload && payload.length) {
       return (
         <div className="p-2 rounded shadow-md uppercase bg-black text-white">
-          <p className="text-sm">{payload[0].payload.title.toUpperCase()}: {`${payload[0].value.toFixed(2)}`}</p>
+          <p className="text-sm">
+            {payload[0].payload.title.toUpperCase()}: {`${payload[0].value.toFixed(2)}`}
+          </p>
         </div>
       );
     }
@@ -32,10 +45,12 @@ const TopTen: React.FC<TopTenProps> = ({ host, showLowest = false }) => {
   useEffect(() => {
     const fetchTopTenMovies = async () => {
       setLoading(true);
+      // Only select movies with a non-null host rating
       const { data, error } = await supabase
         .from("movies")
         .select(`title, ${host}_rating`)
         .eq("status", "episode")
+        .not(`${host}_rating`, "is", null)
         .order(host + "_rating", { ascending: showLowest })
         .limit(10);
 
@@ -47,7 +62,7 @@ const TopTen: React.FC<TopTenProps> = ({ host, showLowest = false }) => {
 
       const processedData = data.map((movie: Record<string, any>) => ({
         title: movie.title,
-        rating: movie[`${host}_rating`] || 0,
+        rating: movie[`${host}_rating`],
       }));
 
       setMovieData(processedData);
@@ -60,11 +75,15 @@ const TopTen: React.FC<TopTenProps> = ({ host, showLowest = false }) => {
   return (
     <Card className="border bg-transparent">
       <CardHeader>
-        <div className="flex items-center gap-2">
+        <div className="flex items-start gap-2">
           {showLowest ? <TrendingDown className="w-6 h-6" /> : <TrendingUp className="w-6 h-6" />}
           <div>
-            <CardTitle>{host.charAt(0).toUpperCase() + host.slice(1)}'s {showLowest ? "Bottom" : "Top"} Ten</CardTitle>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">A look at {host.charAt(0).toUpperCase() + host.slice(1)}'s {showLowest ? "lowest" : "highest"} rated movies.</p>
+            <CardTitle>
+              {host.charAt(0).toUpperCase() + host.slice(1)}'s {showLowest ? "Bottom" : "Top"} Ten
+            </CardTitle>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+              A look at {host.charAt(0).toUpperCase() + host.slice(1)}'s {showLowest ? "lowest" : "highest"} rated movies.
+            </p>
           </div>
         </div>
       </CardHeader>
@@ -76,7 +95,7 @@ const TopTen: React.FC<TopTenProps> = ({ host, showLowest = false }) => {
             <BarChart data={movieData} layout="vertical">
               <CartesianGrid strokeDasharray="3 3" stroke={isDarkMode ? "#333" : "#CCC"} />
               <XAxis type="number" tick={{ fill: axisColor }} domain={[0, 100]} />
-              <YAxis type="category" dataKey="title" tick={{ fill: axisColor, fontSize: '13px' }} width={150} />
+              <YAxis type="category" dataKey="title" tick={{ fill: axisColor, fontSize: "13px" }} width={150} />
               <Tooltip content={<CustomTooltip />} cursor={{ fill: isDarkMode ? "rgba(255, 255, 255, 0.05)" : "rgba(0, 0, 0, 0.05)" }} />
               <Bar dataKey="rating" radius={[0, 5, 5, 0]} fill="hsl(var(--primary))" barSize={20}>
                 {movieData.map((entry, index) => (

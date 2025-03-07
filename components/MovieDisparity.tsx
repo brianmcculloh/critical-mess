@@ -74,7 +74,7 @@ const MovieDisparity: React.FC = () => {
   return (
     <Card className="border bg-transparent">
       <CardHeader>
-        <div className="flex items-center gap-2">
+        <div className="flex items-start gap-2">
           <TrendingUpDown className="w-6 h-6" />
           <div>
             <CardTitle>Mind The Gap</CardTitle>

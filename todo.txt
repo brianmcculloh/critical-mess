@@ -1,5 +1,4 @@
 Achievements and badges to gamify it
 Supabase backups - requires $25 per month pro plan
 
-New charts for host consensus: top 10 most aligned, top 10 least aligned
 New outlier chart where one host is on an island

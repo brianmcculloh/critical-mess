@@ -7,6 +7,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Popcorn, Star, Users, Flame, Sparkles } from "lucide-react";
 import MovieDisparity from "@/components/MovieDisparity";
 import TopTen from "@/components/TopTen";
+import HostConsensus from "@/components/HostConsensus";
+import HostOutlier from "@/components/HostOutlier";
 import {
   Dialog,
   DialogTrigger,
@@ -159,7 +161,7 @@ const InsightsPage: React.FC = () => {
                   value: host.tomatometer_alignment,
                 }))}
                 isDisparity={true}
-                icon={<TomatoIcon />}
+                icon={<TomatoIcon className="w-10 h-10" />}
               />
 
               <HostComparison
@@ -171,7 +173,7 @@ const InsightsPage: React.FC = () => {
                   value: host.popcornmeter_alignment,
                 }))}
                 isDisparity={true}
-                icon={<Popcorn />}
+                icon={<Popcorn className="w-8 h-8" />}
               />
 
               <HostComparison
@@ -183,7 +185,7 @@ const InsightsPage: React.FC = () => {
                   value: host.user_alignment,
                 }))}
                 isDisparity={true}
-                icon={<Users />}
+                icon={<Users className="w-8 h-8" />}
               />
 
               <HostComparison
@@ -213,6 +215,12 @@ const InsightsPage: React.FC = () => {
               <TopTen host="brian" showLowest={true} />
               <TopTen host="gris" showLowest={true} />
               <TopTen host="ben" showLowest={true} />
+
+              <HostConsensus showLowest={true} />
+              <HostConsensus showLowest={false} />
+
+              <HostOutlier />
+              
             </>
           )}
         </div>

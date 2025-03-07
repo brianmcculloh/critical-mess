@@ -72,7 +72,7 @@ const HostComparison: React.FC<HostComparisonProps> = ({ title, description, dat
   return (
     <Card className="border bg-transparent">
        <CardHeader>
-        <div className="flex items-center gap-2">
+        <div className="flex items-start gap-2">
           {icon || <BarChart3 className="w-6 h-6" />}
           <div>
             <CardTitle>{title}</CardTitle>
