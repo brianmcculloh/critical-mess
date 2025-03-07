@@ -73,10 +73,21 @@ const Sorting: React.FC<SortingProps> = ({
       {/* ✅ Dropdown for Sorting Options */}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="outline" className="flex items-center gap-2 h-10">
-            {SORT_OPTIONS.find((option) => option.value === selectedSort)?.label}
-            <ChevronDown className="w-4 h-4 opacity-70" />
-          </Button>
+          <div className="relative inline-block">
+            <TooltipProvider delayDuration={0}>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button variant="outline" className="flex items-center gap-2 h-10">
+                    {SORT_OPTIONS.find((option) => option.value === selectedSort)?.label}
+                    <ChevronDown className="w-4 h-4 opacity-70" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent className="bg-black text-white text-xs rounded-lg px-3 py-2 shadow-lg">
+                  <span>Sort By</span>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
         </DropdownMenuTrigger>
         <DropdownMenuContent>
           {SORT_OPTIONS.map((option) => (
@@ -84,9 +95,7 @@ const Sorting: React.FC<SortingProps> = ({
               key={option.value}
               onClick={() => handleSortChange(option.value)}
               className={`flex items-center justify-between ${
-                selectedSort === option.value
-                  ? "bg-accent text-white font-semibold"
-                  : ""
+                selectedSort === option.value ? "bg-accent text-white font-semibold" : ""
               }`}
             >
               {option.label}
@@ -95,7 +104,6 @@ const Sorting: React.FC<SortingProps> = ({
           ))}
         </DropdownMenuContent>
       </DropdownMenu>
-
       {/* ✅ Sorting Order Controls */}
       <div className="flex border rounded-md overflow-hidden">
         <TooltipProvider delayDuration={0}>
