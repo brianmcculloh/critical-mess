@@ -154,7 +154,7 @@ const InsightsPage: React.FC = () => {
 
               <HostComparison
                 title="Critic Alignment"
-                description="How far above or below is each host to the Tomatometer? Smaller number equals greater alignment."
+                description="How far above or below is each host to the Tomatometer? The smaller the number, the greater the alignment."
                 dataKey="tomatometer_alignment"
                 data={hostAnalytics.map((host) => ({
                   host_name: host.host_name,
@@ -166,7 +166,7 @@ const InsightsPage: React.FC = () => {
 
               <HostComparison
                 title="Popcorn People Alignment"
-                description="How far above or below is each host to the Popcornmeter? Smaller number equals greater alignment."
+                description="How far above or below is each host to the Popcornmeter? The smaller the number, the greater the alignment."
                 dataKey="popcornmeter_alignment"
                 data={hostAnalytics.map((host) => ({
                   host_name: host.host_name,
@@ -178,7 +178,7 @@ const InsightsPage: React.FC = () => {
 
               <HostComparison
                 title="Listener Alignment"
-                description="How far above or below is each host to our listeners? Smaller number equals greater alignment."
+                description="How far above or below is each host to our listeners? The smaller the number, the greater the alignment."
                 dataKey="user_alignment"
                 data={hostAnalytics.map((host) => ({
                   host_name: host.host_name,
@@ -190,7 +190,7 @@ const InsightsPage: React.FC = () => {
 
               <HostComparison
                 title="Heat Meter"
-                description="Which host is out here straight cooking every episode?"
+                description="A look at how much the listeners resonate with the hosts."
                 dataKey="heat_meter"
                 data={
                   hostAnalytics
