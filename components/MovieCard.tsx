@@ -39,6 +39,7 @@ interface MovieCardProps {
   showUserRatings?: boolean;
   showDelete?: boolean;
   showEpisode?: boolean;
+  showMovieLink?: boolean;
   showSuggestedBy?: boolean;
   onClick?: (movie: Movie) => void;
   onDelete?: () => void;
@@ -60,6 +61,7 @@ const MovieCard: React.FC<MovieCardProps> = ({
   showUserRatings = true,
   showDelete = false,
   showEpisode = true,
+  showMovieLink = true,
   showSuggestedBy = false,
   onDelete,
   showUpvoteButton = false,
@@ -153,7 +155,7 @@ const MovieCard: React.FC<MovieCardProps> = ({
 
       {movie.poster_url && (
         <div className="relative mt-2 rounded-lg w-full">
-          <MovieLink movie={movie} isAdmin={isAdmin} onUrlUpdate={() => {/* Optionally refresh or update state */}} />
+          <MovieLink movie={movie} showMovieLink={showMovieLink} isAdmin={isAdmin} onUrlUpdate={() => {/* Optionally refresh or update state */}} />
           {showEpisode && (
             <Episode 
               movieId={movie.id} 

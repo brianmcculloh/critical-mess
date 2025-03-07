@@ -20,9 +20,10 @@ interface MovieLinkProps {
   isAdmin: boolean;
   // Optional callback to notify parent on URL update
   onUrlUpdate?: () => void;
+  showMovieLink?: boolean;
 }
 
-const MovieLink: React.FC<MovieLinkProps> = ({ movie, isAdmin, onUrlUpdate }) => {
+const MovieLink: React.FC<MovieLinkProps> = ({ movie, isAdmin, onUrlUpdate, showMovieLink = true }) => {
   const [editing, setEditing] = useState(false);
   const [urlValue, setUrlValue] = useState(movie.url || "");
   const [showFeedback, setShowFeedback] = useState(false);
@@ -75,17 +76,21 @@ const MovieLink: React.FC<MovieLinkProps> = ({ movie, isAdmin, onUrlUpdate }) =>
   if (isAdmin) {
     return (
       <>
-        <div className="relative group" onClick={() => setEditing(true)}>
+        <div
+          className="relative group"
+          onClick={showMovieLink ? () => setEditing(true) : undefined}
+        >
           {movie.poster_url && (
             <Image
               src={movie.poster_url}
               alt={movie.title}
               width={500}
               height={400}
-              className="mt-2 rounded-lg w-full cursor-pointer transition hover:brightness-50"
+              className={`mt-2 rounded-lg w-full transition ${
+                showMovieLink ? "cursor-pointer hover:brightness-50" : "cursor-default"
+              }`}
             />
           )}
-          {/* Overlay: if editing, always show dark overlay; if not editing, show overlay on hover */}
           {editing ? (
             <>
               <div className="absolute inset-0 bg-black bg-opacity-50"></div>
@@ -101,9 +106,11 @@ const MovieLink: React.FC<MovieLinkProps> = ({ movie, isAdmin, onUrlUpdate }) =>
               />
             </>
           ) : (
-            <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition bg-black bg-opacity-50 cursor-pointer">
-              <span className="text-white font-bold">Click to edit link</span>
-            </div>
+            showMovieLink && (
+              <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition bg-black bg-opacity-50 cursor-pointer">
+                <span className="text-white font-bold">Click to edit link</span>
+              </div>
+            )
           )}
         </div>
         {/* Floating text feedback */}
@@ -125,7 +132,7 @@ const MovieLink: React.FC<MovieLinkProps> = ({ movie, isAdmin, onUrlUpdate }) =>
       </>
     );
   } else {
-    // Non-admin mode: if a URL exists, wrap the image in a link with darken hover overlay
+    // Non-admin mode.
     const imageContent = movie.poster_url ? (
       <Image
         src={movie.poster_url}
@@ -133,28 +140,32 @@ const MovieLink: React.FC<MovieLinkProps> = ({ movie, isAdmin, onUrlUpdate }) =>
         width={500}
         height={400}
         className={`mt-2 rounded-lg w-full transition ${
-          movie.url ? "hover:brightness-50 cursor-pointer" : ""
+          showMovieLink && movie.url ? "cursor-pointer hover:brightness-50" : "cursor-default"
         }`}
       />
     ) : null;
-    return movie.url ? (
-      <a
-        href={movie.url}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="relative group"
-      >
-        {imageContent}
-        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition bg-black bg-opacity-50">
-          <span className="text-white font-bold flex items-center gap-2">
-            <span>Watch episode</span>
-            <Video className="w-5 h-5" />
-          </span>
-        </div>
-      </a>
-    ) : (
-      <div className="relative">{imageContent}</div>
-    );
+
+    if (movie.url && showMovieLink) {
+      return (
+        <a
+          href={movie.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="relative group"
+        >
+          {imageContent}
+          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition bg-black bg-opacity-50">
+            <span className="text-white font-bold flex items-center gap-2">
+              <span>Watch episode</span>
+              <Video className="w-5 h-5" />
+            </span>
+          </div>
+        </a>
+      );
+    } else {
+      // If showMovieLink is false or there's no URL, render the image without interaction.
+      return <div className="relative">{imageContent}</div>;
+    }
   }
 };
 

@@ -316,6 +316,7 @@ const MovieSearchDialog: React.FC<MovieSearchDialogProps> = ({
                   showUserRatings={false} 
                   showDelete={false}
                   showEpisode={fromTopHundred ? false : true}
+                  showMovieLink={fromTopHundred ? false : true}
                   skipEpisodeDatabaseSave={true}
                   onEpisodeChange={setStagedEpisode}
                   onStartEpisodeEdit={() => setIsEditingEpisode(true)}

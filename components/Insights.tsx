@@ -118,9 +118,9 @@ const InsightsPage: React.FC = () => {
             </TooltipTrigger>
             <TooltipContent
               side="top"
-              className="bg-black text-white text-xs rounded-lg px-3 py-2 shadow-lg"
+              className="bg-black text-white text-xs rounded-lg px-3 py-2 shadow-lg w-96"
             >
-              Patrons only
+              Become a Patreon patron to view things like host average ratings, hosts ranked by how closely they align with the critical and audience ratings, hosts ranked by heat meter, and many more insights about our episodes!
             </TooltipContent>
           </Tooltip>
         )}

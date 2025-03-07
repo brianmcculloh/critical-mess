@@ -241,9 +241,9 @@ const TopHundred: React.FC = () => {
             </TooltipTrigger>
             <TooltipContent
               side="top"
-              className="bg-black text-white text-xs rounded-lg px-3 py-2 shadow-lg"
+              className="bg-black text-white text-xs rounded-lg px-3 py-2 shadow-lg w-96"
             >
-              Patrons only
+              Become a Patreon patron to view the official Critical Mess Top 100 movies of all time, as well as each host's individual top 100 movies!
             </TooltipContent>
           </Tooltip>
         )}
