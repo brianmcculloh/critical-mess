@@ -81,7 +81,7 @@ const MovieSearch: React.FC<MovieSearchProps> = ({ onSelectMovie, fetchMovies, i
 
       {movies.length > 0 && (
         <ul className="absolute w-full bg-card border mt-1 rounded-lg shadow-lg z-30">
-          {movies.slice(0, 5).map((movie) => (
+          {movies.slice(0, 10).map((movie) => (
             <li
               key={movie.id}
               className="p-3 cursor-pointer hover:bg-muted"
