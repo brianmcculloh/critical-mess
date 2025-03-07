@@ -231,7 +231,7 @@ const ScoresDisplay: React.FC<ScoresDisplayProps> = ({
       )}
 
       {/* User Rating Section */}
-      {showUserRatings && (
+      {showUserRatings && !isAdmin && (
         <>
           <Separator className="my-2" />
           <div className="flex gap-2 items-start">
