@@ -10,6 +10,7 @@ import {
   TooltipContent,
   TooltipProvider,
 } from "@/components/ui/tooltip";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface Movie {
   id: number;
@@ -26,7 +27,7 @@ interface Movie {
 
 interface ScoresDisplayProps {
   movie: Movie;
-  isAdmin: boolean;
+  isAdmin: boolean; // Determines if the scores are shown on an admin page
   setUserRating?: (rating: number | null) => void;
   showRTRatings?: boolean;
   showHostRatings?: boolean;
@@ -43,12 +44,33 @@ const ScoresDisplay: React.FC<ScoresDisplayProps> = ({
   showUserRatings = true,
   disabled = false,
 }) => {
+  const { user } = useAuth();
+  // New state to check if the current user is an admin in the database.
+  const [currentUserIsAdmin, setCurrentUserIsAdmin] = useState<boolean>(false);
   const [editingField, setEditingField] = useState<string | null>(null);
   const [updatedMovie, setUpdatedMovie] = useState<Movie>(movie);
-  const [userRating, setUserRatingState] = useState<number | null>(null);
+  const [userRating, setUserRatingState] = useState<number | null>(movie.user_rating || null);
   const [avgUserRating, setAvgUserRating] = useState<number | null>(null);
   const [numUserRatings, setNumUserRatings] = useState<number>(0);
   const [disparity, setDisparity] = useState<number | null>(movie.disparity || null);
+
+  // Check the current user's admin status from the public.users table.
+  useEffect(() => {
+    if (!user || !user.id) return;
+    const checkIfAdmin = async () => {
+      const { data, error } = await supabase
+        .from("users")
+        .select("is_admin")
+        .eq("id", user.id)
+        .maybeSingle();
+      if (error) {
+        console.error("Error checking user admin status:", error);
+      } else if (data) {
+        setCurrentUserIsAdmin(data.is_admin);
+      }
+    };
+    checkIfAdmin();
+  }, [user]);
 
   const calculateAndUpdateDisparity = async (
     critic: number | null,
@@ -186,7 +208,6 @@ const ScoresDisplay: React.FC<ScoresDisplayProps> = ({
           </div>
         </div>
       )}
-
       {/* Host Scores Section */}
       {showHostRatings && (
         <div className="flex gap-2 flex-wrap items-start">
@@ -210,21 +231,30 @@ const ScoresDisplay: React.FC<ScoresDisplayProps> = ({
       )}
 
       {/* User Rating Section */}
-      {showUserRatings && !isAdmin && (
+      {showUserRatings && (
         <>
           <Separator className="my-2" />
           <div className="flex gap-2 items-start">
-            <Score
-              label="You"
-              field="user_rating"
-              value={userRating}
-              editingField={editingField}
-              setEditingField={setEditingField}
-              setTempValue={() => {}}
-              saveRating={saveRating}
-              forceEditable
-              disabled={disabled}
-            />
+            {currentUserIsAdmin ? (
+              <div className="flex-1 relative flex flex-col items-center justify-center">
+                <div className="flex items-center gap-2 font-semibold">You</div>
+                <div>
+                  <span className="text-black/40 dark:text-white/40">n/a</span>
+                </div>
+              </div>
+            ) : (
+              <Score
+                label="You"
+                field="user_rating"
+                value={userRating}
+                editingField={editingField}
+                setEditingField={setEditingField}
+                setTempValue={() => {}}
+                saveRating={saveRating}
+                forceEditable
+                disabled={disabled}
+              />
+            )}
             <Separator orientation="vertical" className="h-10" />
             {disabled ? (
               <div className="flex-1 relative flex flex-col items-center justify-center">

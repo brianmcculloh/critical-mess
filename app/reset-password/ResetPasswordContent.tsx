@@ -62,7 +62,7 @@ const ResetPasswordContent: React.FC = () => {
             placeholder="New Password"
             value={newPassword}
             onChange={(e) => setNewPassword(e.target.value)}
-            className="border p-2 rounded"
+            className="border p-2 rounded w-96"
             required
           />
           <input
@@ -70,7 +70,7 @@ const ResetPasswordContent: React.FC = () => {
             placeholder="Confirm New Password"
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
-            className="border p-2 rounded"
+            className="border p-2 rounded w-96"
             required
           />
           <button type="submit" className="bg-primary text-black px-4 py-2 rounded">

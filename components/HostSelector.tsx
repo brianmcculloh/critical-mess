@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/tooltip";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { ThumbsUp } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 
 const HOSTS = ["nick", "brian", "gris", "ben"] as const;
 type Host = (typeof HOSTS)[number];
@@ -29,6 +30,8 @@ const HostSelector: React.FC<HostSelectorProps> = ({
   onSelectionUpdate,
   disabled = false,
 }) => {
+  const { user } = useAuth();
+  const [currentUserIsAdmin, setCurrentUserIsAdmin] = useState(false);
   const [selectedHost, setSelectedHost] = useState<Host | null>(
     initialSelection || null
   );
@@ -43,6 +46,7 @@ const HostSelector: React.FC<HostSelectorProps> = ({
   // New state to control the bottom-right alert
   const [showAlert, setShowAlert] = useState(false);
 
+  // Get or create a clientId.
   useEffect(() => {
     let storedClientId = localStorage.getItem("client_id");
     if (!storedClientId) {
@@ -52,6 +56,25 @@ const HostSelector: React.FC<HostSelectorProps> = ({
     setClientId(storedClientId);
   }, []);
 
+  // Check current user's admin status from public.users.
+  useEffect(() => {
+    if (!user || !user.id) return;
+    const checkIfAdmin = async () => {
+      const { data, error } = await supabase
+        .from("users")
+        .select("is_admin")
+        .eq("id", user.id)
+        .maybeSingle();
+      if (error) {
+        console.error("Error checking admin status:", error);
+      } else if (data) {
+        setCurrentUserIsAdmin(data.is_admin);
+      }
+    };
+    checkIfAdmin();
+  }, [user]);
+
+  // Fetch the selected host from user_host_votes.
   useEffect(() => {
     if (!clientId) return;
     const fetchSelectedHost = async () => {
@@ -72,7 +95,7 @@ const HostSelector: React.FC<HostSelectorProps> = ({
     fetchSelectedHost();
   }, [clientId, movieId]);
 
-  // Hide the alert after 4 seconds
+  // Hide the alert after 4 seconds.
   useEffect(() => {
     if (showAlert) {
       const timer = setTimeout(() => setShowAlert(false), 3000);
@@ -81,6 +104,8 @@ const HostSelector: React.FC<HostSelectorProps> = ({
   }, [showAlert]);
 
   const handleSelectHost = async (host: Host) => {
+    // If the current user is admin, do nothing.
+    if (currentUserIsAdmin) return;
     if (!clientId) return;
     setLoading(true);
 
@@ -93,7 +118,7 @@ const HostSelector: React.FC<HostSelectorProps> = ({
         );
 
       if (error) throw error;
-      // Reset and then trigger the FloatingText for this host
+      // Reset and trigger the FloatingText for this host.
       setFeedbackStates((prev) => ({ ...prev, [host]: false }));
       setTimeout(
         () => setFeedbackStates((prev) => ({ ...prev, [host]: true })),
@@ -101,7 +126,7 @@ const HostSelector: React.FC<HostSelectorProps> = ({
       );
       setSelectedHost(host);
       onSelectionUpdate(host);
-      // Trigger the bottom-right alert notification
+      // Trigger the bottom-right alert notification.
       setShowAlert(true);
     } catch (error) {
       console.error("🚨 Error saving host selection:", error);
@@ -120,14 +145,14 @@ const HostSelector: React.FC<HostSelectorProps> = ({
               className={`px-3 py-1 rounded-lg transition-colors border-2 w-full ${
                 selectedHost === host
                   ? "border-primary bg-primary/40"
-                  : `border-primary/10 ${
-                      disabled ? "" : "hover:border-primary"
-                    } bg-primary/10`
-              } ${disabled ? "cursor-not-allowed" : ""}`}
+                  : `border-primary/10 ${disabled || currentUserIsAdmin ? "" : "hover:border-primary"} bg-primary/10`
+              } ${
+                disabled || currentUserIsAdmin ? "cursor-not-allowed" : "cursor-pointer"
+              }`}
               onClick={() => {
-                if (!disabled && !loading) handleSelectHost(host);
+                if (!disabled && !loading && !currentUserIsAdmin) handleSelectHost(host);
               }}
-              disabled={loading || disabled}
+              disabled={loading || disabled || currentUserIsAdmin}
             >
               {host.charAt(0).toUpperCase() + host.slice(1)}
             </button>
@@ -169,9 +194,7 @@ const HostSelector: React.FC<HostSelectorProps> = ({
           <Alert className="shadow-lg bg-yellow text-black">
             <ThumbsUp color="black" className="absolute left-3 top-1/2 transform w-5 h-5" />
             <AlertTitle>Saved!</AlertTitle>
-            <AlertDescription>
-              Host selection updated
-            </AlertDescription>
+            <AlertDescription>Host selection updated</AlertDescription>
           </Alert>
         </div>
       )}

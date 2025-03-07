@@ -12,20 +12,28 @@ const SignupPage = () => {
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    const { error } = await supabase.auth.signUp({
+  
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
     });
-
+  
+    // If there was an error, display it.
     if (error) {
       setError(error.message);
       return;
     }
-
-    // Redirect to login after sign-up
+  
+    // If no new user was created, assume the account already exists.
+    // (Supabase may choose not to disclose that for security reasons.)
+    if (!data.user) {
+      setError("An account with this email already exists. Please log in.");
+      return;
+    }
+  
+    // Otherwise, if signup was successful, redirect to login.
     router.push("/login");
-  };
+  };  
 
   const handleBackHome = async () => {
     router.push("/");
@@ -43,14 +51,14 @@ const SignupPage = () => {
         <input
           type="email"
           placeholder="Email"
-          className="border p-2 rounded"
+          className="border p-2 rounded w-96"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
         />
         <input
           type="password"
           placeholder="Password"
-          className="border p-2 rounded"
+          className="border p-2 rounded w-96"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
         />

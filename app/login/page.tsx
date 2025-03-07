@@ -53,7 +53,7 @@ const LoginPage = () => {
     setError("");
     setMessage("");
     if (!email) {
-      setError("Please provide your email address first.");
+      setError("Enter your email address to reset your password.");
       return;
     }
     const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
@@ -76,14 +76,14 @@ const LoginPage = () => {
         <input
           type="email"
           placeholder="Email"
-          className="border p-2 rounded"
+          className="border p-2 rounded w-96"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
         />
         <input
           type="password"
           placeholder="Password"
-          className="border p-2 rounded"
+          className="border p-2 rounded w-96"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
         />
