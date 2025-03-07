@@ -319,13 +319,13 @@ const TopHundred: React.FC = () => {
                       </div>
                       {user?.isAdmin && (
                         <button
-                          className="ml-2 p-2"
+                          className="ml-2 p-2 relative"
                           onClick={() => handleDeleteMovie(movie.id)}
                           disabled={deletingMovieId === movie.id}
                         >
                           <Trash2
                             size={20}
-                            className="text-black/30 hover:text-black dark:text-white/30 dark:hover:text-white transition"
+                            className="text-black/30 hover:text-black dark:text-white/30 dark:hover:text-white transition absolute -top-[2px] right-0"
                           />
                         </button>
                       )}
@@ -366,13 +366,13 @@ const TopHundred: React.FC = () => {
                             </div>
                             {user?.isAdmin && (
                               <button
-                                className="ml-2 p-2"
+                                className="ml-2 p-2 relative"
                                 onClick={() => handleDeleteMovie(movie.id)}
                                 disabled={deletingMovieId === movie.id}
                               >
                                 <Trash2
                                   size={20}
-                                  className="text-black/30 hover:text-black dark:text-white/30 dark:hover:text-white transition"
+                                  className="text-black/30 hover:text-black dark:text-white/30 dark:hover:text-white transition absolute -top-[2px] right-0"
                                 />
                               </button>
                             )}
