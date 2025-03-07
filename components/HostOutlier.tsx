@@ -87,7 +87,7 @@ const HostOutlier: React.FC = () => {
           <div>
             <CardTitle>On An Island</CardTitle>
             <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-              One of these scores is not like the others. Top 10 episodes ranked by the largest deviation by one host.
+              Top 10 episodes ranked by the furthest away one host was from the other three.
             </p>
           </div>
         </div>
