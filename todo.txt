@@ -1,2 +1,5 @@
 Achievements and badges to gamify it
 Supabase backups - requires $25 per month pro plan
+
+Show logged in user email in the header
+The locked icon should be a user icon instead

@@ -31,7 +31,7 @@ const MovieSearchLocal: React.FC<MovieSearchLocalProps> = ({ onSearch }) => {
   };
 
   return (
-    <div className="flex items-center gap-2 w-full xs:w-80">
+    <div id="movie-search-local" className="flex items-center gap-2 w-full xs:w-80">
       {/* Search input wrapper */}
       <div className="relative w-full">
         {/* Search icon */}

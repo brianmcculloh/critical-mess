@@ -244,7 +244,7 @@ const MovieSearchDialog: React.FC<MovieSearchDialogProps> = ({
 
       <Dialog open={showOverlay} onOpenChange={setShowOverlay}>
         <DialogTrigger asChild>
-          <Button onClick={() => setShowOverlay(true)} className="text-black dark:drop-shadow-lg">
+          <Button onClick={() => setShowOverlay(true)} className="text-black dark:drop-shadow-lg" id="add-movie">
             {isAdmin ? "Add a Movie" : "Suggest a Movie"}
             <Clapperboard className="transform w-5 h-5" />
           </Button>

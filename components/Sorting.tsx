@@ -69,7 +69,7 @@ const Sorting: React.FC<SortingProps> = ({
   };
 
   return (
-    <div className="flex items-center gap-1">
+    <div id="sorting" className="flex items-center gap-1">
       {/* ✅ Dropdown for Sorting Options */}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>

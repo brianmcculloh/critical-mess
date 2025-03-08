@@ -72,7 +72,7 @@ const SuggestedMovies: React.FC<{ refreshKey: number }> = ({ refreshKey }) => {
   const handleUpvoteSuccess = () => fetchSuggestedMovies();
 
   return (
-    <div>
+    <div id="suggested-movies">
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <TooltipProvider delayDuration={0}>
           <Tooltip>
