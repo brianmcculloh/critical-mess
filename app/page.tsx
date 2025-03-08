@@ -37,7 +37,7 @@ const HomePage: React.FC = () => {
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
   const [refreshKey, setRefreshKey] = useState(0);
   const [suggestedMoviesRefreshKey, setSuggestedMoviesRefreshKey] = useState(0);
-  const [showTutorial, setShowTutorial] = useState(true);
+  const [showTutorial, setShowTutorial] = useState(false);
 
   const triggerRefresh = () => {
     setRefreshKey((prevKey) => prevKey + 1);
