@@ -1,4 +1,3 @@
-Achievements and badges to gamify it
 Supabase backups - requires $25 per month pro plan
 
 Admin panel, add new queue movie that doesn't have one of the two ratings, manually add the missing rating, add another movie, when grid refreshes the manual rating reverts visually (but is stored in db and shows once page is refreshed)
