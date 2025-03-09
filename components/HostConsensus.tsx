@@ -94,7 +94,7 @@ const HostConsensus: React.FC<HostConsensusProps> = ({ showLowest = true }) => {
               {showLowest ? "Least Disagreement" : "Most Disagreement"}
             </CardTitle>
             <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-              Top 10 episodes ranked by how much we {showLowest ? "agreed" : "disagreed"}. The higher the number, the more we disagreed.
+              Top 10 episodes ranked by how much we {showLowest ? "agreed" : "disagreed"} with each other. The higher the number, the more diverse our opinions were.
             </p>
           </div>
         </div>
@@ -106,7 +106,8 @@ const HostConsensus: React.FC<HostConsensusProps> = ({ showLowest = true }) => {
           <ResponsiveContainer width="100%" height={350}>
             <BarChart data={movieData} layout="vertical">
               <CartesianGrid strokeDasharray="3 3" stroke={isDarkMode ? "#333" : "#CCC"} />
-              <XAxis type="number" tick={{ fill: axisColor }} domain={["auto", "auto"]} />
+              {/* Set the minimum to 0 and maximum remains auto */}
+              <XAxis type="number" tick={{ fill: axisColor }} domain={[0, "auto"]} />
               <YAxis
                 type="category"
                 dataKey="title"
