@@ -92,7 +92,7 @@ const QueuedMovies: React.FC<{ refreshKey: number }> = ({ refreshKey }) => {
           </Tooltip>
         </TooltipProvider>
         <DialogContent
-          className="w-full xs:w-4/5 max-w-none mt-6 mb-6 max-h-[calc(100vh-3rem)] overflow-y-auto"
+          className="w-full xs:w-4/5 max-w-none mt-6 max-h-[calc(100vh-3rem)] overflow-y-auto"
           onOpenAutoFocus={(event) => event.preventDefault()}
         >
           <DialogTitle>All Queued Movies</DialogTitle>

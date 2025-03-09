@@ -150,7 +150,7 @@ const InsightsPage: React.FC = () => {
       </TooltipProvider>
 
       <DialogContent
-        className="w-full lg:w-5/6 max-w-[1600px] max-h-screen overflow-y-auto"
+        className="w-full lg:w-5/6 max-w-[1600px] mt-6 max-h-[calc(100vh-3rem)] overflow-y-auto"
         onOpenAutoFocus={(event) => event.preventDefault()}
       >
         <DialogTitle>Insights</DialogTitle>

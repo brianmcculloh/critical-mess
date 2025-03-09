@@ -272,7 +272,7 @@ const TopHundred: React.FC = () => {
         )}
       </TooltipProvider>
       <DialogContent
-        className="max-w-3xl w-full max-h-screen overflow-y-auto p-4"
+        className="max-w-3xl w-full mt-6 max-h-[calc(100vh-3rem)] overflow-y-auto p-4"
         onOpenAutoFocus={(event) => event.preventDefault()}
       >
         <DialogTitle>Certified Ranch-Blasted™ Movies</DialogTitle>
