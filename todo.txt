@@ -1,5 +1,9 @@
 Achievements and badges to gamify it
 Supabase backups - requires $25 per month pro plan
 
-Show logged in user email in the header
-The locked icon should be a user icon instead
+Admin panel, add new queue movie that doesn't have one of the two ratings, manually add the missing rating, add another movie, when grid refreshes the manual rating reverts visually (but is stored in db and shows once page is refreshed)
+
+user stats dashboard
+-see how many movies you've rated
+-how many hosts you've voted for
+-what movies you've suggested

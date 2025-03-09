@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import HostComparison from "@/components/HostComparison";
 import { useAuth } from "@/contexts/AuthContext";
@@ -59,6 +59,9 @@ const InsightsPage: React.FC = () => {
   // New state for storing the user's patron level
   const [patronLevel, setPatronLevel] = useState<number>(0);
 
+  // New state for controlling tooltip visibility on disabled button
+  const [tooltipOpen, setTooltipOpen] = useState(false);
+
   const fetchInsights = async () => {
     setLoading(true);
     const [hostResponse] = await Promise.all([
@@ -76,7 +79,6 @@ const InsightsPage: React.FC = () => {
   // Fetch the current user's patron_level from your users table
   useEffect(() => {
     const fetchPatronLevel = async () => {
-      // Depending on your Supabase client version, you might call:
       const { data: { user } } = await supabase.auth.getUser();
       if (user?.id) {
         const { data, error } = await supabase
@@ -94,6 +96,26 @@ const InsightsPage: React.FC = () => {
     fetchPatronLevel();
   }, []);
 
+  // Handle click on disabled Insights button for non-patrons.
+  const handleDisabledClick = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setTooltipOpen(true);
+  }, []);
+
+  // Close tooltip when clicking anywhere else on the document.
+  useEffect(() => {
+    const handleDocumentClick = () => {
+      if (tooltipOpen) {
+        setTooltipOpen(false);
+      }
+    };
+    document.addEventListener("click", handleDocumentClick);
+    return () => {
+      document.removeEventListener("click", handleDocumentClick);
+    };
+  }, [tooltipOpen]);
+
   return (
     <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
       <TooltipProvider delayDuration={0}>
@@ -106,12 +128,11 @@ const InsightsPage: React.FC = () => {
             </Button>
           </DialogTrigger>
         ) : (
-          // For non-patrons: render a normal button (enabled so pointer events work)
-          // that does nothing when clicked, and show a tooltip.
-          <Tooltip>
+          // For non-patrons: render a button that shows a tooltip on click.
+          <Tooltip open={tooltipOpen} onOpenChange={setTooltipOpen}>
             <TooltipTrigger asChild>
               <Button
-                onClick={(e) => e.preventDefault()}
+                onClick={handleDisabledClick}
                 className="cursor-not-allowed transition-colors bg-secondary hover:bg-secondary/70 text-black dark:text-white"
               >
                 Insights
@@ -193,12 +214,10 @@ const InsightsPage: React.FC = () => {
                 description="A look at how much the listeners resonate with the hosts."
                 dataKey="heat_meter"
                 data={
-                  hostAnalytics
-                    /*.filter((host) => host.host_name.toLowerCase() !== "ben")*/
-                    .map((host) => ({
-                      host_name: host.host_name,
-                      value: host.heat_meter * 100,
-                    }))
+                  hostAnalytics.map((host) => ({
+                    host_name: host.host_name,
+                    value: host.heat_meter * 100,
+                  }))
                 }
                 relativeYAxis={true}
                 icon={<Flame />}
@@ -220,7 +239,6 @@ const InsightsPage: React.FC = () => {
               <HostConsensus showLowest={false} />
 
               <HostOutlier />
-              
             </>
           )}
         </div>

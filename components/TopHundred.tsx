@@ -50,6 +50,9 @@ const TopHundred: React.FC = () => {
   // New state for the current user's patron level.
   const [patronLevel, setPatronLevel] = useState<number>(0);
 
+  // New state for controlling tooltip visibility on disabled button.
+  const [tooltipOpen, setTooltipOpen] = useState(false);
+
   // Fetch the current user's patron_level from the users table.
   useEffect(() => {
     const fetchPatronLevel = async () => {
@@ -218,6 +221,26 @@ const TopHundred: React.FC = () => {
     }
   };
 
+  // Handle click on disabled Top 100 button for non-patrons.
+  const handleDisabledClick = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setTooltipOpen(true);
+  }, []);
+
+  // Close tooltip when clicking anywhere else on the document.
+  useEffect(() => {
+    const handleDocumentClick = () => {
+      if (tooltipOpen) {
+        setTooltipOpen(false);
+      }
+    };
+    document.addEventListener("click", handleDocumentClick);
+    return () => {
+      document.removeEventListener("click", handleDocumentClick);
+    };
+  }, [tooltipOpen]);
+
   return (
     <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
       <TooltipProvider delayDuration={0}>
@@ -229,10 +252,10 @@ const TopHundred: React.FC = () => {
             </Button>
           </DialogTrigger>
         ) : (
-          <Tooltip>
+          <Tooltip open={tooltipOpen} onOpenChange={setTooltipOpen}>
             <TooltipTrigger asChild>
               <Button
-                onClick={(e) => e.preventDefault()}
+                onClick={handleDisabledClick}
                 className="cursor-not-allowed transition-colors bg-secondary hover:bg-secondary/70 text-black dark:text-white"
               >
                 Top 100

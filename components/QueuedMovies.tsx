@@ -97,7 +97,7 @@ const QueuedMovies: React.FC<{ refreshKey: number }> = ({ refreshKey }) => {
         >
           <DialogTitle>All Queued Movies</DialogTitle>
           <DialogDescription>
-            These are movies waiting for their turn. Upvote your favorites!
+            These are movies waiting for their turn. Upvote your favorites! (Future episode order has not been determined. List is in order of dated added to queue.)
           </DialogDescription>
           <div className="grid custom-grid gap-4">
             {movies.map((movie) => (
