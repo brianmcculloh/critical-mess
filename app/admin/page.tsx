@@ -123,15 +123,20 @@ const AdminPage: React.FC = () => {
 
   return (
     <>
-      <div className="flex gap-2 items-center flex-wrap">
-        {/* Add MovieSearchLocal before Sorting */}
-        <MovieSearchLocal onSearch={handleSearch} />
-        <Sorting
-          onSortChange={handleSortChange}
-          currentSortKey={sortKey}
-          currentSortOrder={sortOrder}
-        />
-        <StatusToggle status={viewStatus} onToggle={setViewStatus} />
+      <div className="flex gap-2 items-center flex-wrap justify-between">
+        <div className="flex gap-1 xs:gap-1 items-center flex-wrap">
+          {/* Add MovieSearchLocal before Sorting */}
+          <MovieSearchLocal onSearch={handleSearch} />
+          <Sorting
+            onSortChange={handleSortChange}
+            currentSortKey={sortKey}
+            currentSortOrder={sortOrder}
+          />
+          <div className="flex gap-1/2 flex-wrap flex-col">
+            <StatusToggle status={viewStatus} onToggle={setViewStatus} />
+            <div className="text-xs text-gray-600 dark:text-gray-400">{filteredMovies.length} movies returned</div>
+          </div>
+        </div>
         <div className="flex gap-1 xs:gap-1 items-center flex-wrap">
           <MovieSearchDialog
             fetchMovies={refreshMovies}

@@ -123,9 +123,12 @@ const HomePage: React.FC = () => {
   return (
     <>
       {showTutorial && <Tutorial onClose={() => setShowTutorial(false)} />}
-      <div className="flex gap-1 xs:gap-2 mt-2 xs:mt-4 pb-2 xs:pb-2items-center flex-wrap">
-        <MovieSearchLocal onSearch={handleSearch} />
-        <Sorting onSortChange={handleSortChange} currentSortKey={sortKey} currentSortOrder={sortOrder} />
+      <div className="flex gap-1 xs:gap-2 mt-2 xs:mt-4 pb-2 xs:pb-2items-center flex-wrap justify-between">
+        <div className="flex gap-1 xs:gap-1 items-center flex-wrap">
+          <MovieSearchLocal onSearch={handleSearch} />
+          <Sorting onSortChange={handleSortChange} currentSortKey={sortKey} currentSortOrder={sortOrder} />
+          <div className="text-xs text-gray-600 dark:text-gray-400">{filteredMovies.length} movies</div>
+        </div>
         <div className="flex gap-1 xs:gap-1 items-center flex-wrap">
           <MovieSearchDialog
             fetchMovies={() => fetchMovies(setMovies, setLoading)}

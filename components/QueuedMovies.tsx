@@ -95,7 +95,7 @@ const QueuedMovies: React.FC<{ refreshKey: number }> = ({ refreshKey }) => {
           className="w-full xs:w-4/5 max-w-none mt-6 max-h-[calc(100vh-3rem)] overflow-y-auto"
           onOpenAutoFocus={(event) => event.preventDefault()}
         >
-          <DialogTitle>All Queued Movies</DialogTitle>
+          <DialogTitle>All Queued Movies <span className="text-xs text-gray-600 dark:text-gray-400 font-normal">({movies.length})</span></DialogTitle>
           <DialogDescription>
             These are movies waiting for their turn. Upvote your favorites! (Future episode order has not been determined. List is in order of dated added to queue.)
           </DialogDescription>
