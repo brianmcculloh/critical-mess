@@ -43,7 +43,7 @@ const QueuedMovies: React.FC<{ refreshKey: number }> = ({ refreshKey }) => {
         .from("movies")
         .select("id, title, year, poster_url, critic_rating, audience_rating, created_at")
         .eq("status", "queue")
-        .order("created_at", { ascending: false }); // ✅ Sort by created_at DESC
+        .order("title", { ascending: true }); // ✅ Sort by title ASC
 
       if (error) {
         console.error("Error fetching queue movies:", error.message || error);
@@ -97,7 +97,7 @@ const QueuedMovies: React.FC<{ refreshKey: number }> = ({ refreshKey }) => {
         >
           <DialogTitle>All Queued Movies <span className="text-xs text-gray-600 dark:text-gray-400 font-normal">({movies.length})</span></DialogTitle>
           <DialogDescription>
-            These are movies waiting for their turn. Upvote your favorites! (Future episode order has not been determined. List is in order of dated added to queue.)
+            These are movies waiting for their turn. Upvote your favorites! (List is in alphabetical order. Future episode order has not been determined.)
           </DialogDescription>
           <div className="grid custom-grid gap-4">
             {movies.map((movie) => (
