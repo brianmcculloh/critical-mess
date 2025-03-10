@@ -155,7 +155,7 @@ const InsightsPage: React.FC = () => {
       >
         <DialogTitle>Insights</DialogTitle>
         <DialogDescription>
-          View various analytics and comparisons about our hosts.
+          We're deep in a Hot Pocket now! Discover insights, preferences, and patterns about our hosts.
         </DialogDescription>
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
           {loading ? (
@@ -211,7 +211,7 @@ const InsightsPage: React.FC = () => {
 
               <HostComparison
                 title="Heat Meter"
-                description="A look at how much the listeners resonate with the hosts."
+                description="A look at how much the listeners resonate with each host."
                 dataKey="heat_meter"
                 data={
                   hostAnalytics.map((host) => ({

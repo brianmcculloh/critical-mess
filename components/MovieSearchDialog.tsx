@@ -51,7 +51,6 @@ const MovieSearchDialog: React.FC<MovieSearchDialogProps> = ({
   const { user } = useAuth();
   const [addingMovie, setAddingMovie] = useState(false);
 
-
   useEffect(() => {
     if (showSuccessAlert) {
       const timer = setTimeout(() => setShowSuccessAlert(false), 4000);
@@ -210,6 +209,16 @@ const MovieSearchDialog: React.FC<MovieSearchDialogProps> = ({
               console.error("Error deleting duplicate rows:", deleteError);
             }
           }
+          // Calculate and update disparity when the movie is first added,
+          // provided both critic_rating and audience_rating are not null.
+          if (!fromTopHundred) {
+            const critic = movieData.critic_rating;
+            const audience = movieData.audience_rating;
+            if (critic !== null && audience !== null) {
+              const disparity = Math.abs(critic - audience);
+              await supabase.from("movies").update({ disparity }).eq("id", data[0].id);
+            }
+          }
           setSelectedMovie(null);
           setStagedEpisode(0);
           setShowOverlay(false);
@@ -335,7 +344,6 @@ const MovieSearchDialog: React.FC<MovieSearchDialogProps> = ({
                   }
                   <Check className="transform w-5 h-5" />
                 </Button>
-
               </div>
             )}
           </div>
