@@ -61,7 +61,7 @@ export default function DeleteMovieModal({
   return (
     <Dialog.Root open={open} onOpenChange={setOpen}>
       <Dialog.Trigger asChild>
-        <button className="absolute top-4 right-4 z-20">
+        <button className="absolute top-5 right-3.5 z-20">
           <Trash2
             size={20}
             className="text-black/30 hover:text-black dark:text-white/30 dark:hover:text-white transition"

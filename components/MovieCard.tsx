@@ -148,7 +148,7 @@ const MovieCard: React.FC<MovieCardProps> = ({
 
   return (
     <div className="relative p-4 border text-card-foreground rounded-lg shadow bg-card">
-      <h3 className="mb-3 flex items-center">
+      <h3 className={`mb-3 flex items-center ${isAdmin ? "pr-7" : ""}`}>
         {movie.title.trim().length > 26 ? (
           <div className="flex-1 overflow-hidden">
             <div className="inline-flex whitespace-nowrap animate-marquee">
@@ -167,9 +167,11 @@ const MovieCard: React.FC<MovieCardProps> = ({
         ) : (
           <span className="flex-1 text-2xl font-light">{movie.title}</span>
         )}
-        <span className="ml-2 text-xs text-gray-500">
-          ({movie.year || "n/a"})
-        </span>
+        {!isAdmin && 
+          <span className="ml-2 text-xs text-gray-500">
+            ({movie.year || "n/a"})
+          </span>
+        }
 
         <style jsx>{`
           @keyframes marqueeAnimation {
