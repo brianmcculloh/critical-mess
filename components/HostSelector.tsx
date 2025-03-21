@@ -43,7 +43,14 @@ const HostSelector: React.FC<HostSelectorProps> = ({
     gris: false,
     ben: false,
   });
-  // New state to control the bottom-right alert
+  // State for vote counts (heat meter values)
+  const [votes, setVotes] = useState<Record<Host, number>>({
+    nick: 0,
+    brian: 0,
+    gris: 0,
+    ben: 0,
+  });
+  // State to control the bottom-right alert
   const [showAlert, setShowAlert] = useState(false);
 
   // Get or create a clientId.
@@ -95,7 +102,39 @@ const HostSelector: React.FC<HostSelectorProps> = ({
     fetchSelectedHost();
   }, [clientId, movieId]);
 
-  // Hide the alert after 4 seconds.
+  // Function to fetch vote counts (heat meter values)
+  const fetchVotes = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("user_host_votes")
+        .select("host")
+        .eq("movie_id", movieId);
+      if (error) throw error;
+      if (data) {
+        const newVotes: Record<Host, number> = {
+          nick: 0,
+          brian: 0,
+          gris: 0,
+          ben: 0,
+        };
+        data.forEach((entry: { host: string }) => {
+          if (newVotes[entry.host as Host] !== undefined) {
+            newVotes[entry.host as Host] += 1;
+          }
+        });
+        setVotes(newVotes);
+      }
+    } catch (error) {
+      console.error("🚨 Error fetching vote counts:", error);
+    }
+  };
+
+  // Fetch vote counts on mount or when movieId changes.
+  useEffect(() => {
+    fetchVotes();
+  }, [movieId]);
+
+  // Hide the alert after 3 seconds.
   useEffect(() => {
     if (showAlert) {
       const timer = setTimeout(() => setShowAlert(false), 3000);
@@ -128,6 +167,8 @@ const HostSelector: React.FC<HostSelectorProps> = ({
       onSelectionUpdate(host);
       // Trigger the bottom-right alert notification.
       setShowAlert(true);
+      // Optionally update the vote counts immediately.
+      fetchVotes();
     } catch (error) {
       console.error("🚨 Error saving host selection:", error);
     } finally {
@@ -135,37 +176,67 @@ const HostSelector: React.FC<HostSelectorProps> = ({
     }
   };
 
+  // Calculate the maximum vote count (avoid division by zero).
+  const maxVotes = Math.max(...Object.values(votes), 1);
+
   const content = (
     <div className="p-2">
-      {/* Host selection buttons */}
-      <div className="mt-3 flex gap-2 justify-stretch">
-        {HOSTS.map((host) => (
-          <div className="relative inline-block grow" key={host}>
-            <button
-              className={`px-3 py-1 rounded-lg transition-colors border-2 w-full ${
-                selectedHost === host
-                  ? "border-primary bg-primary/40"
-                  : `border-primary/10 ${disabled || currentUserIsAdmin ? "" : "hover:border-primary"} bg-primary/10`
-              } ${
-                disabled || currentUserIsAdmin ? "cursor-not-allowed" : "cursor-pointer"
-              }`}
-              onClick={() => {
-                if (!disabled && !loading && !currentUserIsAdmin) handleSelectHost(host);
-              }}
-              disabled={loading || disabled || currentUserIsAdmin}
+      {/* Host selection buttons with heat meter bars attached */}
+      <div className="mt-3 flex gap-2">
+        {HOSTS.map((host) => {
+          // Calculate the dynamic width percentage for the heat meter bar.
+          const widthPercentage = (votes[host] / maxVotes) * 100;
+          return (
+            <div
+              className="relative flex-1 flex flex-col items-center"
+              key={host}
             >
-              {host.charAt(0).toUpperCase() + host.slice(1)}
-            </button>
+              <button
+                // Added "relative" so the bar can be absolutely positioned inside.
+                className={`relative px-3 py-1 rounded-lg transition-colors border-2 w-full ${
+                  selectedHost === host
+                    ? "border-primary bg-primary/40"
+                    : `border-primary/10 ${
+                        disabled || currentUserIsAdmin
+                          ? ""
+                          : "hover:border-primary"
+                      } bg-primary/10`
+                } ${
+                  disabled || currentUserIsAdmin
+                    ? "cursor-not-allowed"
+                    : "cursor-pointer"
+                }`}
+                onClick={() => {
+                  if (!disabled && !loading && !currentUserIsAdmin)
+                    handleSelectHost(host);
+                }}
+                disabled={loading || disabled || currentUserIsAdmin}
+              >
+                {host.charAt(0).toUpperCase() + host.slice(1)}
+                {/* Heat meter bar: a small dynamic bar attached to the bottom */}
+                <div
+                  className="pointer-events-none absolute bottom-0 left-0 h-1 bg-primary rounded-bl-lg"
+                  style={{ width: `${widthPercentage}%` }}
+                ></div>
+              </button>
 
-            <FloatingText
-              show={feedbackStates[host]}
-              message="Saved!"
-              onComplete={() =>
-                setFeedbackStates((prev) => ({ ...prev, [host]: false }))
-              }
-            />
-          </div>
-        ))}
+              {/* Vote count: display only if votes > 0 */}
+              {votes[host] > 0 && (
+                <div className="mt-1 text-center text-sm font-medium text-gray-600 dark:text-gray-400">
+                  {votes[host]}
+                </div>
+              )}
+
+              <FloatingText
+                show={feedbackStates[host]}
+                message="Saved!"
+                onComplete={() =>
+                  setFeedbackStates((prev) => ({ ...prev, [host]: false }))
+                }
+              />
+            </div>
+          );
+        })}
       </div>
     </div>
   );
@@ -192,7 +263,10 @@ const HostSelector: React.FC<HostSelectorProps> = ({
       {showAlert && (
         <div className="fixed bottom-4 right-4 rounded-lg shadow-lg z-50">
           <Alert className="shadow-lg bg-yellow text-black">
-            <ThumbsUp color="black" className="absolute left-3 top-1/2 transform w-5 h-5" />
+            <ThumbsUp
+              color="black"
+              className="absolute left-3 top-1/2 transform w-5 h-5"
+            />
             <AlertTitle>Saved!</AlertTitle>
             <AlertDescription>Host selection updated</AlertDescription>
           </Alert>

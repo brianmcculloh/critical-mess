@@ -7,7 +7,6 @@ import SkeletonMovieCard from "@/components/SkeletonMovieCard";
 import MovieSearchLocal from "@/components/MovieSearchLocal";
 import MovieSearchDialog from "@/components/MovieSearchDialog";
 import { fetchMovies } from "@/lib/movieUtils";
-import { useRouter } from "next/navigation";
 import SuggestedMovies from "@/components/SuggestedMovies";
 import QueuedMovies from "@/components/QueuedMovies";
 import TopHundred from "@/components/TopHundred";

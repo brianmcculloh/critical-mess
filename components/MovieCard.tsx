@@ -148,9 +148,48 @@ const MovieCard: React.FC<MovieCardProps> = ({
 
   return (
     <div className="relative p-4 border text-card-foreground rounded-lg shadow bg-card">
-      <h3 className="pr-7 mb-3">
-        <span className="text-2xl font-light">{movie.title}</span>{" "}
-        {/*<span className="text-xs text-gray-500">({movie.year || "n/a"})</span>*/}
+      <h3 className="mb-3 flex items-center">
+        {movie.title.trim().length > 26 ? (
+          <div className="flex-1 overflow-hidden">
+            <div className="inline-flex whitespace-nowrap animate-marquee">
+              {/* First copy of the title plus gap */}
+              <div className="flex-shrink-0 inline-flex items-center">
+                <span className="text-2xl font-light">{movie.title.trim()}</span>
+                <span className="inline-block w-4" aria-hidden="true"></span>
+              </div>
+              {/* Second copy */}
+              <div className="flex-shrink-0 inline-flex items-center">
+                <span className="text-2xl font-light">{movie.title.trim()}</span>
+                <span className="inline-block w-4" aria-hidden="true"></span>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <span className="flex-1 text-2xl font-light">{movie.title}</span>
+        )}
+        <span className="ml-2 text-xs text-gray-500">
+          ({movie.year || "n/a"})
+        </span>
+
+        <style jsx>{`
+          @keyframes marqueeAnimation {
+            0% {
+              transform: translateX(0);
+            }
+            25% {
+              transform: translateX(0);
+            }
+            75% {
+              transform: translateX(-50%);
+            }
+            100% {
+              transform: translateX(-50%);
+            }
+          }
+          .animate-marquee {
+            animation: marqueeAnimation 12s linear infinite;
+          }
+        `}</style>
       </h3>
 
       {movie.poster_url && (
@@ -207,7 +246,7 @@ const MovieCard: React.FC<MovieCardProps> = ({
             onSelectionUpdate={handleHostSelectionUpdate}
             disabled={disabled}
           />
-          <HeatMeter key={heatMeterKey} movieId={movie.id} />
+          {/*<HeatMeter key={heatMeterKey} movieId={movie.id} />*/ /* This will show a full-blown bar graph below the selector */}
         </>
       )}
 

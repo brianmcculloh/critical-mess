@@ -2,8 +2,6 @@ Supabase backups - requires $25 per month pro plan
 
 Admin panel, add new queue movie that doesn't have one of the two ratings, manually add the missing rating, add another movie, when grid refreshes the manual rating reverts visually (but is stored in db and shows once page is refreshed)
 
-Number of movies showing at the top
-
 user stats dashboard
 -see how many movies you've rated
 -how many hosts you've voted for
