@@ -175,7 +175,7 @@ const Tutorial: React.FC<TutorialProps> = ({ onClose }) => {
                       sideOffset={-160}
                     >
                       <span>
-                        This is just an example.<br />Click "Got It!" when you're ready.
+                        This is just an example.<br />Click "Got It!" to continue.
                       </span>
                     </TooltipContent>
                   </Tooltip>

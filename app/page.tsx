@@ -65,11 +65,17 @@ const HomePage: React.FC = () => {
   
   useEffect(() => {
     const hasVisited = localStorage.getItem("hasVisited");
-    if (!hasVisited) {
+    if (!hasVisited || hasVisited === "false") {
       setShowTutorial(true);
-      localStorage.setItem("hasVisited", "true");
     }
   }, []);
+  
+  useEffect(() => {
+    if (showTutorial) {
+      // Delay setting this until *after* tutorial is actually visible
+      localStorage.setItem("hasVisited", "true");
+    }
+  }, [showTutorial]);  
 
   const handleSearch = (searchTerm: string) => {
     if (!searchTerm) {
