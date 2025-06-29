@@ -66,9 +66,7 @@ const AdminPage: React.FC = () => {
       .filter((movie) => movie.status === viewStatus)
       .sort((a, b) => {
         const key = sortKey as keyof Movie;
-        let valueA: number | string = a[key] ?? 0;
-        let valueB: number | string = b[key] ?? 0;
-
+      
         if (key === "title") {
           const titleA = a.title.toLowerCase();
           const titleB = b.title.toLowerCase();
@@ -76,19 +74,37 @@ const AdminPage: React.FC = () => {
             ? titleA.localeCompare(titleB)
             : titleB.localeCompare(titleA);
         }
-
-        if (key === "created_at") {
-          valueA = a.created_at ? new Date(a.created_at).getTime() : 0;
-          valueB = b.created_at ? new Date(b.created_at).getTime() : 0;
+      
+        if (key === "episode") {
+          const episodeA = a.episode ?? 0;
+          const episodeB = b.episode ?? 0;
+      
+          if (episodeA !== episodeB) {
+            return sortOrder === "asc" ? episodeA - episodeB : episodeB - episodeA;
+          }
+      
+          // If episodes are the same, fall back to created_at (most recent first)
+          const createdAtA = a.created_at ? new Date(a.created_at).getTime() : 0;
+          const createdAtB = b.created_at ? new Date(b.created_at).getTime() : 0;
+          return createdAtB - createdAtA; // always newest first
         }
-
+      
+        if (key === "created_at") {
+          const createdAtA = a.created_at ? new Date(a.created_at).getTime() : 0;
+          const createdAtB = b.created_at ? new Date(b.created_at).getTime() : 0;
+          return sortOrder === "asc" ? createdAtA - createdAtB : createdAtB - createdAtA;
+        }
+      
+        let valueA: number | string = a[key] ?? 0;
+        let valueB: number | string = b[key] ?? 0;
+      
         const numA =
           typeof valueA === "number" ? valueA : parseFloat(valueA.toString()) || 0;
         const numB =
           typeof valueB === "number" ? valueB : parseFloat(valueB.toString()) || 0;
-
+      
         return sortOrder === "asc" ? numA - numB : numB - numA;
-      });
+      });      
 
     setFilteredMovies(filtered);
   }, [movies, sortKey, sortOrder, viewStatus]);
@@ -101,9 +117,50 @@ const AdminPage: React.FC = () => {
   // Implement local search filtering based on title or year
   const handleSearch = (searchTerm: string) => {
     if (!searchTerm) {
-      setFilteredMovies(movies.filter((movie) => movie.status === viewStatus));
+      const sorted = movies
+        .filter((movie) => movie.status === viewStatus)
+        .sort((a, b) => {
+          if (sortKey === "title") {
+            const titleA = a.title.toLowerCase();
+            const titleB = b.title.toLowerCase();
+            return sortOrder === "asc"
+              ? titleA.localeCompare(titleB)
+              : titleB.localeCompare(titleA);
+          }
+    
+          if (sortKey === "episode") {
+            const episodeA = a.episode ?? 0;
+            const episodeB = b.episode ?? 0;
+            if (episodeA !== episodeB) {
+              return sortOrder === "asc" ? episodeA - episodeB : episodeB - episodeA;
+            }
+            const createdAtA = a.created_at ? new Date(a.created_at).getTime() : 0;
+            const createdAtB = b.created_at ? new Date(b.created_at).getTime() : 0;
+            return createdAtB - createdAtA;
+          }
+    
+          if (sortKey === "created_at") {
+            const createdAtA = a.created_at ? new Date(a.created_at).getTime() : 0;
+            const createdAtB = b.created_at ? new Date(b.created_at).getTime() : 0;
+            return sortOrder === "asc"
+              ? createdAtA - createdAtB
+              : createdAtB - createdAtA;
+          }
+    
+          let valueA = a[sortKey as keyof Movie] ?? 0;
+          let valueB = b[sortKey as keyof Movie] ?? 0;
+    
+          const numA =
+            typeof valueA === "number" ? valueA : parseFloat(valueA.toString()) || 0;
+          const numB =
+            typeof valueB === "number" ? valueB : parseFloat(valueB.toString()) || 0;
+    
+          return sortOrder === "asc" ? numA - numB : numB - numA;
+        });
+    
+      setFilteredMovies(sorted);
       return;
-    }
+    }    
 
     const filtered = movies
       .filter((movie) => movie.status === viewStatus)
