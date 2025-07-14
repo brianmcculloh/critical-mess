@@ -13,6 +13,7 @@ import Insights from "@/components/Insights";
 import { fetchMovies } from "@/lib/movieUtils";
 import TopHundred from "@/components/TopHundred";
 import SkeletonMovieCard from "@/components/SkeletonMovieCard";
+import HotPocketGenerator from "@/components/HotPocketGenerator";
 
 interface Movie {
   id: number;
@@ -203,6 +204,7 @@ const AdminPage: React.FC = () => {
           <SuggestedMovies refreshKey={refreshKey} />
           <Insights />
           <TopHundred />
+          <HotPocketGenerator />
         </div>
       </div>
 

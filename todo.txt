@@ -6,3 +6,7 @@ user stats dashboard
 -see how many movies you've rated
 -how many hosts you've voted for
 -what movies you've suggested
+
+UX feedback from Gris:
+When adding to my top 100 I would like to select a jump to number in that portion when I go to select the movie or add the movie. That way it lets me slide it into the spot I want maybe. 
+Also noticed a slight “bug” that when I would select the image that it pulls for the movie would sometimes be tiny and sometime she giant and off the page large. Just made me scroll slightly to get to the “submit movie” or whatever the button says.

@@ -64,7 +64,7 @@ const ScoresDisplay: React.FC<ScoresDisplayProps> = ({
         .eq("id", user.id)
         .maybeSingle();
       if (error) {
-        console.error("Error checking user admin status:", error);
+        console.error("Error checking user admin status:", error, error?.message, error?.stack);
       } else if (data) {
         setCurrentUserIsAdmin(data.is_admin);
       }
