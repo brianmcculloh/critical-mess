@@ -12,6 +12,7 @@ import QueuedMovies from "@/components/QueuedMovies";
 import TopHundred from "@/components/TopHundred";
 import Insights from "@/components/Insights";
 import Tutorial from "@/components/Tutorial";
+import HotPocketGenerator from "@/components/HotPocketGenerator";
 
 interface Movie {
   id: number;
@@ -64,10 +65,12 @@ const HomePage: React.FC = () => {
   }, [movies]);
   
   useEffect(() => {
-    const hasVisited = localStorage.getItem("hasVisited");
-    if (!hasVisited || hasVisited === "false") {
-      setShowTutorial(true);
-    }
+    // Always show the tutorial for debugging
+    setShowTutorial(true);
+    // const hasVisited = localStorage.getItem("hasVisited");
+    // if (!hasVisited || hasVisited === "false") {
+    //   setShowTutorial(true);
+    // }
   }, []);
   
   useEffect(() => {

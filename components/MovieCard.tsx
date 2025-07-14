@@ -50,6 +50,9 @@ interface MovieCardProps {
   triggerSuggestedMoviesRefresh?: () => void;
   onStartEpisodeEdit?: () => void;
   onStopEpisodeEdit?: () => void;
+  userRating?: number | null; // <-- new optional prop
+  suggestionCount?: number | null; // <-- new optional prop
+  userHasSuggested?: boolean; // <-- new optional prop
 }
 
 const MovieCard: React.FC<MovieCardProps> = ({
@@ -70,13 +73,16 @@ const MovieCard: React.FC<MovieCardProps> = ({
   onEpisodeChange,
   triggerSuggestedMoviesRefresh,
   onStartEpisodeEdit,
-  onStopEpisodeEdit
+  onStopEpisodeEdit,
+  userRating: userRatingProp,
+  suggestionCount: suggestionCountProp, // <-- new prop
+  userHasSuggested: userHasSuggestedProp, // <-- new prop
 }) => {
-  const [userRating, setUserRating] = useState<number | null>(movie.user_rating || null);
+  const [userRating, setUserRating] = useState<number | null>(userRatingProp !== undefined ? userRatingProp : (movie.user_rating || null));
   const [heatMeterKey, setHeatMeterKey] = useState(0);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [canUpvote, setCanUpvote] = useState(false);
-  const [suggestionCount, setSuggestionCount] = useState<number | null>(movie.suggestion_count || null);
+  const [canUpvote, setCanUpvote] = useState(userHasSuggestedProp !== undefined ? !userHasSuggestedProp : false);
+  const [suggestionCount, setSuggestionCount] = useState<number | null>(suggestionCountProp !== undefined ? suggestionCountProp : (movie.suggestion_count || null));
 
   const pathname = usePathname();
   const isAdmin = pathname === "/admin";
@@ -97,6 +103,25 @@ const MovieCard: React.FC<MovieCardProps> = ({
   };
 
   useEffect(() => {
+    if (userRatingProp !== undefined) {
+      setUserRating(userRatingProp);
+    }
+  }, [userRatingProp]);
+
+  useEffect(() => {
+    if (suggestionCountProp !== undefined) {
+      setSuggestionCount(suggestionCountProp);
+    }
+  }, [suggestionCountProp]);
+  useEffect(() => {
+    if (userHasSuggestedProp !== undefined) {
+      setCanUpvote(!userHasSuggestedProp);
+    }
+  }, [userHasSuggestedProp]);
+
+  useEffect(() => {
+    if (suggestionCountProp !== undefined && userHasSuggestedProp !== undefined) return;
+    // Only fetch if not provided by props
     const checkUserSuggestion = async () => {
       const clientId = localStorage.getItem("client_id");
       if (!clientId) return;
@@ -116,7 +141,7 @@ const MovieCard: React.FC<MovieCardProps> = ({
       checkUserSuggestion();
       fetchSuggestionCount();
     }
-  }, [movie.id, showUpvoteButton]);
+  }, [movie.id, showUpvoteButton, suggestionCountProp, userHasSuggestedProp]);
 
   const handleHostSelectionUpdate = () => setHeatMeterKey((prevKey) => prevKey + 1);
 
@@ -236,6 +261,7 @@ const MovieCard: React.FC<MovieCardProps> = ({
           showRTRatings={showRTRatings}
           showHostRatings={showHostRatings}
           showUserRatings={showUserRatings}
+          userRating={userRating} // <-- pass to ScoresDisplay
         />
       )}
 

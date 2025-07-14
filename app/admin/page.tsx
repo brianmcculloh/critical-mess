@@ -202,9 +202,9 @@ const AdminPage: React.FC = () => {
             isAdmin={true}
           />
           <SuggestedMovies refreshKey={refreshKey} />
+          <HotPocketGenerator />
           <Insights />
           <TopHundred />
-          <HotPocketGenerator />
         </div>
       </div>
 

@@ -46,6 +46,36 @@ interface BubbleData {
 }
 
 const Tutorial: React.FC<TutorialProps> = ({ onClose }) => {
+  // Add mobile detection state
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Track if the tutorial has been shown before
+  const [hasSeenTutorial, setHasSeenTutorial] = useState<boolean>(false);
+
+  useEffect(() => {
+    // Function to check window width
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 1180 - 1);
+    };
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
+  // Check localStorage for tutorial flag on mount
+  useEffect(() => {
+    const seen = localStorage.getItem("hasSeenTutorial");
+    setHasSeenTutorial(!!seen);
+  }, []);
+
+  // When tutorial is closed, set flag in localStorage
+  const handleClose = () => {
+    localStorage.setItem("hasSeenTutorial", "true");
+    onClose();
+  };
+
+  // Hide tutorial on mobile or if already seen by rendering null in JSX, not by early return
+
   const [exampleMovie, setExampleMovie] = useState<Movie | null>(null);
   // "dialog" shows the initial tutorial dialog; "lock" is the overlay step.
   const [tutorialStep, setTutorialStep] = useState<"dialog" | "lock">("dialog");
@@ -128,7 +158,7 @@ const Tutorial: React.FC<TutorialProps> = ({ onClose }) => {
     }
   }, [tutorialStep]);
 
-  return (
+  return (isMobile || hasSeenTutorial) ? null : (
     <>
       {tutorialStep === "dialog" && (
         <Dialog
@@ -141,7 +171,7 @@ const Tutorial: React.FC<TutorialProps> = ({ onClose }) => {
           }}
         >
           <DialogContent
-            className="max-h-screen fixed"
+            className="max-h-screen fixed max-w-[440px] w-full"
             onPointerDownOutside={(e) => e.preventDefault()}
           >
             <DialogHeader>
@@ -153,45 +183,49 @@ const Tutorial: React.FC<TutorialProps> = ({ onClose }) => {
               </DialogDescription>
             </DialogHeader>
             {exampleMovie ? (
-              <div className="grid custom-grid gap-4 relative">
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <div className="cursor-not-allowed">
-                        <MovieCard
-                          movie={{
-                            ...exampleMovie,
-                            suggestion_count: exampleMovie.suggestion_count ?? 0,
-                            status: exampleMovie.status ?? "episode",
-                          }}
-                          editable={true}
-                          disabled={true}
-                        />
-                      </div>
-                    </TooltipTrigger>
-                    <TooltipContent
-                      className="bg-white text-black text-2xl font-bold"
-                      side="top"
-                      sideOffset={-160}
-                    >
-                      <span>
-                        This is just an example.<br />Click "Got It!" to continue.
-                      </span>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-                {/* Original absolute-positioned speech bubbles */}
-                <div className="absolute top-[479px] -left-[150px]">
+              <div className="relative flex justify-center">
+                <div className="w-full">
+                  <div className="grid custom-grid tutorial-grid gap-4 w-full">
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <div className="cursor-not-allowed w-full max-w-[390px] mx-auto">
+                            <MovieCard
+                              movie={{
+                                ...exampleMovie,
+                                suggestion_count: exampleMovie.suggestion_count ?? 0,
+                                status: exampleMovie.status ?? "episode",
+                              }}
+                              editable={true}
+                              disabled={true}
+                            />
+                          </div>
+                        </TooltipTrigger>
+                        <TooltipContent
+                          className="bg-white text-black text-2xl font-bold"
+                          side="top"
+                          sideOffset={-160}
+                        >
+                          <span>
+                            This is just an example.<br />Click "Got It!" to continue.
+                          </span>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </div>
+                </div>
+                {/* Move speech bubbles outside the grid */}
+                <div className="absolute top-[441px] -left-[163px]">
                   <SpeechBubble message="Add your score here!" arrowDirection="right" />
                 </div>
-                <div className="absolute top-[556px] -right-[315px]">
-                  <SpeechBubble message="Pick which host you liked most!" arrowDirection="left" />
+                <div className="absolute top-[518px] -right-[372px]">
+                  <SpeechBubble message="Pick which host you vibed with most!" arrowDirection="left" />
                 </div>
               </div>
             ) : (
               <p>Loading example movie...</p>
             )}
-            <div className="mt-2 flex justify-end absolute bottom-[10px] right-[10px]">
+            <div className="mt-2 flex justify-end absolute bottom-[5px] right-[10px]">
               {/* Transition to lock mode */}
               <Button
                 onClick={() => setTutorialStep("lock")}
@@ -207,7 +241,7 @@ const Tutorial: React.FC<TutorialProps> = ({ onClose }) => {
 
       {tutorialStep === "lock" && (
         // Transparent full-screen overlay that closes the tutorial on any click.
-        <div className="fixed inset-0 z-50 bg-transparent" onClick={onClose}>
+        <div className="fixed inset-0 z-50 bg-transparent" onClick={handleClose}>
           {bubbles.map(
             (bubble, index) =>
               bubble.position && (

@@ -2,9 +2,12 @@ import React, { useState, useEffect, useRef, useCallback, memo } from "react";
 import { createPortal } from "react-dom";
 import Image from "next/image";
 import hotPocketData, { HotPocketData, Ingredient } from "./hotPocketData";
-import { Utensils } from "lucide-react";
 import { Dialog, DialogTrigger, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { useTheme } from "next-themes";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 
 const categories = [
   { key: "breakfast", label: "Breakfast" },
@@ -13,6 +16,12 @@ const categories = [
 ];
 
 const bandNames = ["Base", "Modifier", "Crust", "Seasoning"];
+const bandLabels: Record<string, string> = {
+  Base: "The Pocket",
+  Modifier: "The Special Ingredient",
+  Crust: "The Crust",
+  Seasoning: "The Seasoning"
+};
 
 // Weighted random selection utility
 function weightedRandom<T extends { weight: number }>(items: T[]): number {
@@ -40,12 +49,18 @@ interface HitIngredient extends Ingredient { isHit?: boolean; }
 const ReelSystem = memo(function ReelSystem({ 
   categoryData, 
   onBakeClick,
-  onNext
+  onNext,
+  resolvedTheme,
+  isCompact
 }: { 
   categoryData: any;
   onBakeClick: (hitItems: HitIngredient[], seasoningStyle: string) => void;
   onNext: () => void;
+  resolvedTheme: string | undefined;
+  isCompact: boolean;
 }) {
+  const outerBorderWidth = isCompact ? 2 : 4;
+
   const handleStartOver = () => {
     // Clear the modal timer if it exists
     if (modalTimerRef.current) {
@@ -62,6 +77,10 @@ const ReelSystem = memo(function ReelSystem({
   const reelRefs = useRef<(HTMLDivElement | null)[]>([]);
   const isAnimationCompleteRef = useRef(false);
   const modalTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Add state for lock toggles (Modifier, Crust, Seasoning)
+  // [Base, Modifier, Crust, Seasoning] - only Modifier (1), Crust (2), Seasoning (3) are lockable
+  const [locked, setLocked] = useState([false, false, false, false]);
 
   // Helper function to shuffle an array
   const shuffleArray = (array: Ingredient[]) => {
@@ -94,25 +113,34 @@ const ReelSystem = memo(function ReelSystem({
   }, [categoryData]);
 
   // Memoized Reel component
-  const Reel = memo(function Reel({ items, selectedIdx, greyed, bandName, reelIndex }: { 
+  const Reel = memo(function Reel({ items, selectedIdx, greyed, bandName, reelIndex, resolvedTheme, isCompact, locked }: { 
     items: HitIngredient[];
     selectedIdx: number; 
     greyed: boolean; 
     bandName: string; 
     reelIndex: number;
+    resolvedTheme: string | undefined;
+    isCompact: boolean;
+    locked: boolean;
   }) {
-
-    
-    const borderColor = 'hsl(var(--border))';
+    const borderColor = locked ? '#fbbf24' : 'hsl(var(--border))';
+    const isLightMode = resolvedTheme === "light";
+    const outerBorderWidthLocal = isCompact ? 2 : 4;
+    const itemWidth = isCompact ? 140 : 200;
+    const itemHeight = isCompact ? 140 : 200;
+    const outerReelHeight = isCompact ? 420 : 535;
+    const itemFont = isCompact ? { fontSize: '.8rem', lineHeight: '1.2rem' } : {};
     return (
       <div
-        className={`relative h-[535px] w-56 flex items-center justify-center rounded-xl bg-black`}
+        className={`relative flex items-center justify-center rounded-xl ${isLightMode ? 'bg-white' : 'bg-black'} w-56 min-w-56 max-w-56`}
         style={{
-          border: `4px solid ${borderColor}`,
+          height: outerReelHeight,
+          border: `${outerBorderWidthLocal}px solid ${borderColor}`,
+          ...(isCompact ? { width: 172, minWidth: 172, maxWidth: 172 } : {}),
         }}
       >
-        <div className="pointer-events-none absolute top-0 left-0 w-full z-20 rounded-t-[10px]" style={{height: '75px', background: 'linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 100%)'}} />
-        <div className="pointer-events-none absolute bottom-0 left-0 w-full z-20 rounded-b-[10px]" style={{height: '75px', background: 'linear-gradient(to top, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 100%)'}} />
+        <div className="pointer-events-none absolute top-0 left-0 w-full z-20 rounded-t-[10px]" style={{height: '75px', background: isLightMode ? 'linear-gradient(to bottom, rgba(255,255,255,1) 0%, rgba(255,255,255,0) 100%)' : 'linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 100%)'}} />
+        <div className="pointer-events-none absolute bottom-0 left-0 w-full z-20 rounded-b-[10px]" style={{height: '75px', background: isLightMode ? 'linear-gradient(to top, rgba(255,255,255,1) 0%, rgba(255,255,255,0) 100%)' : 'linear-gradient(to top, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 100%)'}} />
         <div 
           ref={(el) => { 
             reelRefs.current[reelIndex] = el; 
@@ -122,12 +150,15 @@ const ReelSystem = memo(function ReelSystem({
         >
           <div className="w-full">
             {items.map((item, idx) => {
-              const backgroundColor = 'black';
+              const backgroundColor = isLightMode ? 'white' : 'black';
               return (
                 <div
                   key={`${item.name}-${idx}`}
-                  className={`min-h-[200px] max-h-[200px] h-[200px] flex flex-col items-center justify-center w-full border-b-[3px] border-dashed px-5 text-center p-[15px]`}
+                  className={`flex flex-col items-center justify-center w-full border-b-[3px] border-dashed px-5 text-center p-[15px]`}
                   style={{
+                    minHeight: itemHeight,
+                    maxHeight: itemHeight,
+                    height: itemHeight,
                     backgroundColor,
                     borderColor: 'hsl(var(--border)/0.5)',
                     borderStyle: 'dashed',
@@ -151,7 +182,7 @@ const ReelSystem = memo(function ReelSystem({
                       if (bandName === 'Base') {
                         return (
                           <Image 
-                            src="/hotpocket.png" 
+                            src={isLightMode ? "/hotpocket-lightmode.png" : "/hotpocket.png"}
                             alt="Base" 
                             width={64} 
                             height={64} 
@@ -161,7 +192,7 @@ const ReelSystem = memo(function ReelSystem({
                       } else if (bandName === 'Modifier') {
                         return (
                           <Image 
-                            src="/modifier.png" 
+                            src={isLightMode ? "/modifier-lightmode.png" : "/modifier.png"}
                             alt="Modifier" 
                             width={64} 
                             height={64} 
@@ -171,7 +202,7 @@ const ReelSystem = memo(function ReelSystem({
                       } else if (bandName === 'Crust') {
                         return (
                           <Image 
-                            src="/crust.png" 
+                            src={isLightMode ? "/crust-lightmode.png" : "/crust.png"}
                             alt="Crust" 
                             width={64} 
                             height={64} 
@@ -181,7 +212,7 @@ const ReelSystem = memo(function ReelSystem({
                       } else if (bandName === 'Seasoning') {
                         return (
                           <Image 
-                            src="/seasoning.png" 
+                            src={isLightMode ? "/seasoning-lightmode.png" : "/seasoning.png"}
                             alt="Seasoning" 
                             width={64} 
                             height={64} 
@@ -193,7 +224,12 @@ const ReelSystem = memo(function ReelSystem({
                       }
                     })()}
                   </div>
-                  <span className={`text-base ${item.isHit && item.name !== 'None' && !(reelIndex === 2 && item.name === 'Original') ? 'text-white font-bold' : 'text-card-foreground opacity-50'}`}>{item?.name || ""}</span>
+                  <span
+                    className={`text-base ${item.isHit && item.name !== 'None' && !(reelIndex === 2 && item.name === 'Original') ? (isLightMode ? 'text-black font-bold' : 'text-white font-bold') : 'text-card-foreground opacity-50'}`}
+                    style={itemFont}
+                  >
+                    {item?.name || ""}
+                  </span>
                 </div>
               );
             })}
@@ -212,9 +248,20 @@ const ReelSystem = memo(function ReelSystem({
     bandNames.forEach((band, i) => {
       const bandKey = band.toLowerCase() as keyof HotPocketData["breakfast"];
       const allItems = categoryData[bandKey];
-      const hitIdx = weightedRandom(allItems);
-      const hitItem = allItems[hitIdx];
-      newHitItems[i] = { ...hitItem, isHit: true };
+      // For Modifier, Crust, Seasoning, check lock
+      if ((i === 1 || i === 2 || i === 3) && locked[i]) {
+        // Filter out 'None' (and 'Original' for Crust)
+        let filteredItems = allItems.filter((item: Ingredient) => item.name !== 'None');
+        if (i === 2) filteredItems = filteredItems.filter((item: Ingredient) => item.name !== 'Original');
+        // If all filtered out, fallback to allItems
+        const hitIdx = filteredItems.length > 0 ? weightedRandom(filteredItems) : weightedRandom(allItems);
+        const hitItem = (filteredItems.length > 0 ? filteredItems : allItems)[hitIdx];
+        newHitItems[i] = { ...hitItem, isHit: true };
+      } else {
+        const hitIdx = weightedRandom(allItems);
+        const hitItem = allItems[hitIdx];
+        newHitItems[i] = { ...hitItem, isHit: true };
+      }
     });
 
     // Set seasoning style based on the hitting seasoning
@@ -240,20 +287,22 @@ const ReelSystem = memo(function ReelSystem({
     // 5) System does the reel scrolling
     const startTime = Date.now();
     const duration = 3000; // 3 seconds
-    const animateScroll = () => {
+    const animateScroll = (isCompactArg: boolean, borderWidthArg: number) => {
       const elapsed = Date.now() - startTime;
       const progress = Math.min(elapsed / duration, 1);
       const easeOutCubic = 1 - Math.pow(1 - progress, 3);
       reelRefs.current.forEach((reelRef, index) => {
         if (reelRef) {
           const maxScroll = reelRef.scrollHeight - reelRef.clientHeight;
-          const targetScroll = maxScroll - 40; // Offset by 40px
+          // Offset by 40px for normal, 5px for compact (fine-tuned for center alignment)
+          const offset = isCompactArg ? 5 : 40;
+          const targetScroll = maxScroll - offset;
           const currentScroll = targetScroll * easeOutCubic;
           reelRef.scrollTop = currentScroll;
         }
       });
       if (progress < 1) {
-        requestAnimationFrame(animateScroll);
+        requestAnimationFrame(() => animateScroll(isCompactArg, borderWidthArg));
       } else {
         isAnimationCompleteRef.current = true;
         // Apply yellow borders directly to the DOM without re-rendering
@@ -268,11 +317,11 @@ const ReelSystem = memo(function ReelSystem({
               if (hitItem && !shouldNotHighlight) {
                 // Fade in the yellow border
                 reelContainer.style.transition = 'border-color 0.5s ease-in-out, box-shadow 0.5s ease-in-out';
-                reelContainer.style.border = '4px solid #fbbf24';
+                reelContainer.style.border = `${borderWidthArg}px solid #fbbf24`;
                 reelContainer.style.boxShadow = '0 0 10px rgba(251, 191, 36, 0.5)';
               } else {
                 // Keep default border for "None" selections
-                reelContainer.style.border = '4px solid hsl(var(--border))';
+                reelContainer.style.border = `${borderWidthArg}px solid hsl(var(--border))`;
                 reelContainer.style.boxShadow = 'none';
               }
             }
@@ -280,12 +329,13 @@ const ReelSystem = memo(function ReelSystem({
         });
       }
     };
-    requestAnimationFrame(animateScroll);
+    requestAnimationFrame(() => animateScroll(isCompact, outerBorderWidth));
 
     // 6) Exactly 4 seconds after the user clicks bake, the results modal should become visible
     modalTimerRef.current = setTimeout(() => {
-
-      onBakeClick(newHitItems, seasoningStyle);
+      setTimeout(() => {
+        onBakeClick(newHitItems, seasoningStyle);
+      }, 500); // 0.5s delay after reels finish
     }, 4000);
   };
 
@@ -296,7 +346,7 @@ const ReelSystem = memo(function ReelSystem({
         <div className="pointer-events-none absolute z-0 h-0.5 bg-muted-foreground/60" style={{
           left: '-100px',
           right: '-100px',
-          top: 'calc(50% + 18px)',
+          top: 'calc(50% + 3px)',
           transform: 'translateY(-50%)'
         }} />
         {bandNames.map((band, i) => {
@@ -309,14 +359,40 @@ const ReelSystem = memo(function ReelSystem({
               key={band}
               className="flex flex-col items-center rounded-lg min-h-[180px] text-card-foreground"
             >
-              <div className="font-bold text-md mb-2 text-center">{band}</div>
+              <div
+                className="font-bold mb-2 text-center"
+                style={isCompact ? { fontSize: '0.75rem', lineHeight: '1rem' } : { fontSize: '1rem', lineHeight: '1.25rem' }}
+              >
+                {bandLabels[band]}
+              </div>
               <Reel
                 items={reelItemsList[i] as HitIngredient[]} // Cast to HitIngredient[]
                 selectedIdx={selectedIndices[i]}
                 greyed={isNone}
                 bandName={band}
                 reelIndex={i}
+                resolvedTheme={resolvedTheme}
+                isCompact={isCompact}
+                locked={locked[i]}
               />
+              {/* Add lock toggle for Modifier, Crust, Seasoning; add spacer for Base */}
+              {i === 0 ? (
+                <div className="flex flex-col items-center mt-2" style={{ height: isCompact ? 19 : 23 }} />
+              ) : (
+                <div className="flex flex-col items-center mt-2">
+                  <div className="flex items-center gap-2">
+                    <Switch
+                      id={`lock-toggle-${i}`}
+                      checked={locked[i]}
+                      onCheckedChange={checked => setLocked(l => l.map((v, idx) => idx === i ? checked : v))}
+                      className="data-[state=checked]:bg-primary data-[state=unchecked]:bg-input border border-gray-300 dark:border-accent"
+                    />
+                    <Label htmlFor={`lock-toggle-${i}`} className="text-xs font-medium select-none text-muted-foreground dark:text-gray-300">
+                      locked on
+                    </Label>
+                  </div>
+                </div>
+              )}
             </div>
           );
         })}
@@ -346,10 +422,22 @@ const ReelSystem = memo(function ReelSystem({
 });
 
 const HotPocketGenerator: React.FC = () => {
-  
+  const { resolvedTheme } = useTheme();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [showResult, setShowResult] = useState(false);
+  // Responsive: 991px and below
+  const [isCompact, setIsCompact] = useState(false);
+  const [isNarrow, setIsNarrow] = useState(false);
+  useEffect(() => {
+    const check = () => {
+      setIsCompact(window.innerWidth <= 991);
+      setIsNarrow(window.innerWidth < 1180);
+    };
+    check();
+    window.addEventListener('resize', check);
+    return () => window.removeEventListener('resize', check);
+  }, []);
   
   // Store hit results in a ref
   const hitItemsRef = useRef<HitIngredient[]>([]);
@@ -381,7 +469,7 @@ const HotPocketGenerator: React.FC = () => {
 
   // Result formatting
   function getResultText(hitItems: HitIngredient[], seasoningStyle: string) {
-    if (!categoryData || hitItems.length === 0) return { parts: [] };
+    if (!categoryData || hitItems.length === 0) return { parts: [], person: undefined };
     const [base, modifier, crust, seasoning] = hitItems;
     
     // Helper function to check if a word starts with a vowel
@@ -391,6 +479,7 @@ const HotPocketGenerator: React.FC = () => {
     };
     
     const parts: { text: string; type: 'white' | 'primary' | 'seasoning' }[] = [];
+    let person: string | undefined = undefined;
     
     // Base name (primary yellow)
     parts.push({ text: base.name.toUpperCase(), type: 'primary' });
@@ -414,9 +503,13 @@ const HotPocketGenerator: React.FC = () => {
       const seasoningText = seasoningStyle.toLowerCase() === "blasted" ? "BLASTED" : seasoningStyle.toLowerCase();
       parts.push({ text: ` ${seasoningText} with `, type: 'seasoning' });
       parts.push({ text: seasoning.name.toLowerCase(), type: 'primary' });
+      // If seasoning has a person property, add it
+      if ((seasoning as any).person) {
+        person = (seasoning as any).person;
+      }
     }
     
-    return { parts };
+    return { parts, person };
   }
 
   // Portal-based Results Modal
@@ -424,13 +517,28 @@ const HotPocketGenerator: React.FC = () => {
     
     if (!showResult || !categoryData) return null;
 
+    // Determine if light mode
+    const isLightMode = resolvedTheme === "light";
+
+    // Animation state for smooth entrance
+    const [visible, setVisible] = useState(false);
+    useEffect(() => {
+      setVisible(true);
+    }, []);
+
     return createPortal(
       <div
         className="fixed top-0 left-0 right-0 bottom-0 z-[9999] bg-black/50 pointer-events-auto"
         onClick={() => setShowResult(false)}
       >
         <div
-          className="fixed top-[25px] left-1/2 transform -translate-x-1/2 z-[10000] bg-background border rounded-2xl p-8 text-center w-[750px] max-w-[750px] pointer-events-auto"
+          className="fixed left-1/2 z-[10000] bg-background border rounded-2xl p-8 text-center w-[750px] max-w-[750px] pointer-events-auto"
+          style={{
+            top: '25px',
+            opacity: visible ? 1 : 0,
+            transform: visible ? 'translate(-50%, 0)' : 'translate(-50%, 80px)',
+            transition: 'opacity 0.7s cubic-bezier(0.4,0,0.2,1), transform 0.7s cubic-bezier(0.4,0,0.2,1)',
+          }}
           onClick={e => e.stopPropagation()}
         >
           {/* Close button as X in upper right corner */}
@@ -448,7 +556,7 @@ const HotPocketGenerator: React.FC = () => {
           </button>
           <div className="flex justify-center mb-4">
             <Image 
-              src="/hotpocket.png" 
+              src={isLightMode ? "/hotpocket-lightmode.png" : "/hotpocket.png"}
               alt="Hot Pocket" 
               width={120} 
               height={120} 
@@ -459,7 +567,7 @@ const HotPocketGenerator: React.FC = () => {
           <div className="flex flex-col gap-6">
             <div className="text-3xl font-bold mb-2">
               <div>
-                <span className="text-white">It's {getResultText(hitItemsRef.current, seasoningStyleRef.current).parts.length > 0 && getResultText(hitItemsRef.current, seasoningStyleRef.current).parts[0].text.toLowerCase().match(/^[aeiou]/) ? 'an ' : 'a '}</span>
+                <span className={isLightMode ? "text-black" : "text-white"}>It's {getResultText(hitItemsRef.current, seasoningStyleRef.current).parts.length > 0 && getResultText(hitItemsRef.current, seasoningStyleRef.current).parts[0].text.toLowerCase().match(/^[aeiou]/) ? 'an ' : 'a '}</span>
                 {getResultText(hitItemsRef.current, seasoningStyleRef.current).parts.map((part, index) => {
                   if (part.type === 'primary') {
                     return (
@@ -475,15 +583,25 @@ const HotPocketGenerator: React.FC = () => {
                     );
                   } else {
                     return (
-                      <span key={index} className="text-white">
+                      <span key={index} className={isLightMode ? "text-black" : "text-white"}>
                         {part.text}
                       </span>
                     );
                   }
                 })}
+                {/* Show person if present */}
+                {(() => {
+                  const result = getResultText(hitItemsRef.current, seasoningStyleRef.current);
+                  if (result.person) {
+                    return (
+                      <span className={isLightMode ? "text-black" : "text-white"}> by {result.person}</span>
+                    );
+                  }
+                  return null;
+                })()}
               </div>
             </div>
-            <div className="text-base text-white">
+            <div className={isLightMode ? "text-base text-black" : "text-base text-white"}>
               *{hitItemsRef.current[0]?.ingredientList?.map(ingredient => ingredient.toLowerCase()).join(", ")}
             </div>
             <div className="flex gap-4 justify-center mt-6">
@@ -496,6 +614,20 @@ const HotPocketGenerator: React.FC = () => {
     );
   };
 
+  // SSR/hydration-safe: only hide after first client render
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setMounted(true); }, []);
+
+  // Hide completely on 767px and below
+  const [isHidden, setIsHidden] = useState(false);
+  useEffect(() => {
+    const checkHidden = () => setIsHidden(window.innerWidth <= 767);
+    checkHidden();
+    window.addEventListener('resize', checkHidden);
+    return () => window.removeEventListener('resize', checkHidden);
+  }, []);
+
+  if (!mounted || isHidden) return null;
   return (
     <>
       <Dialog
@@ -512,14 +644,41 @@ const HotPocketGenerator: React.FC = () => {
           }
         }}
       >
-        <DialogTrigger asChild>
-          <Button className="transition-colors bg-secondary hover:bg-secondary/70 text-black dark:text-white">
+        <TooltipProvider delayDuration={0}>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <DialogTrigger asChild>
+                <Button variant="outline" className="relative h-10 px-3 xs:px-4">
+                  <Image 
+                    src={resolvedTheme === "light" ? "/hotpocket-lightmode.png" : "/hotpocket.png"}
+                    alt="Hot Pocket"
+                    width={29}
+                    height={29}
+                    className="object-contain -my-1"
+                  />
+                </Button>
+              </DialogTrigger>
+            </TooltipTrigger>
+            <TooltipContent className="bg-black">
+              <span>Hot Pocket Generator</span>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+        <DialogContent
+          className={
+            isNarrow
+              ? "mt-5 max-h-[calc(100vh-40px)] rounded-2xl p-2 xs:p-8 py-8 xs:py-16 text-center"
+              : "w-[calc(100vw-200px)] max-w-[calc(100vw-200px)] mt-5 max-h-[calc(100vh-40px)] rounded-2xl p-8 py-16 text-center"
+          }
+          style={
+            isNarrow
+              ? { width: '100vw', maxWidth: '100vw', margin: '0 auto' }
+              : undefined
+          }
+        >
+          <DialogTitle className="text-center" style={{ fontSize: '2.25rem', lineHeight: '2.5rem', fontWeight: 700 }}>
             Hot Pocket Generator
-            <Utensils className="transform w-5 h-5" />
-          </Button>
-        </DialogTrigger>
-        <DialogContent className="w-[calc(100vw-200px)] max-w-[calc(100vw-200px)] mt-5 max-h-[calc(100vh-40px)] overflow-y-auto rounded-2xl p-8 py-16 text-center">
-          <DialogTitle className="text-center">Hot Pocket Generator</DialogTitle>
+          </DialogTitle>
           <DialogDescription className="text-center">
             192,000 possible flavor combinations! Most of them make sense.
           </DialogDescription>
@@ -528,13 +687,14 @@ const HotPocketGenerator: React.FC = () => {
               {categories.map((cat) => (
                 <Button
                   key={cat.key}
-                  className={`w-[250px] h-[250px] rounded-xl p-6 flex flex-col items-center justify-center gap-4 transition-all duration-200 ${
+                  className={`h-[250px] rounded-xl p-6 flex flex-col items-center justify-center gap-4 transition-all duration-200 ${
                     cat.key === 'breakfast' 
                       ? 'bg-[#d5693f] text-white hover:bg-[#d5693f]/80' 
                       : cat.key === 'dinner'
                       ? 'bg-[#b92638] text-white hover:bg-[#b92638]/80'
                       : 'bg-[#6a3253] text-white hover:bg-[#6a3253]/80'
                   }`}
+                  style={{ width: isCompact ? 220 : 250 }}
                   onClick={() => handleCategorySelect(cat.key)}
                 >
                   <div className="w-20 h-20 rounded-lg flex items-center justify-center overflow-hidden">
@@ -575,6 +735,8 @@ const HotPocketGenerator: React.FC = () => {
               categoryData={categoryData} 
               onBakeClick={handleBakeClick}
               onNext={handleNext}
+              resolvedTheme={resolvedTheme}
+              isCompact={isCompact}
             />
           )}
         </DialogContent>

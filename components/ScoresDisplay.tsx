@@ -33,6 +33,7 @@ interface ScoresDisplayProps {
   showHostRatings?: boolean;
   showUserRatings?: boolean;
   disabled?: boolean;
+  userRating?: number | null; // <-- new optional prop
 }
 
 const ScoresDisplay: React.FC<ScoresDisplayProps> = ({
@@ -43,13 +44,14 @@ const ScoresDisplay: React.FC<ScoresDisplayProps> = ({
   showHostRatings = true,
   showUserRatings = true,
   disabled = false,
+  userRating: userRatingProp // <-- new prop
 }) => {
   const { user } = useAuth();
   // New state to check if the current user is an admin in the database.
   const [currentUserIsAdmin, setCurrentUserIsAdmin] = useState<boolean>(false);
   const [editingField, setEditingField] = useState<string | null>(null);
   const [updatedMovie, setUpdatedMovie] = useState<Movie>(movie);
-  const [userRating, setUserRatingState] = useState<number | null>(movie.user_rating || null);
+  const [userRating, setUserRatingState] = useState<number | null>(userRatingProp !== undefined ? userRatingProp : (movie.user_rating || null));
   const [avgUserRating, setAvgUserRating] = useState<number | null>(null);
   const [numUserRatings, setNumUserRatings] = useState<number>(0);
   const [disparity, setDisparity] = useState<number | null>(movie.disparity || null);
@@ -121,6 +123,12 @@ const ScoresDisplay: React.FC<ScoresDisplayProps> = ({
 
     fetchUserRatings();
   }, [movie.id, setUserRating]);
+
+  useEffect(() => {
+    if (userRatingProp !== undefined) {
+      setUserRatingState(userRatingProp);
+    }
+  }, [userRatingProp]);
 
   const saveRating = async (field: string, value: number) => {
     if (isAdmin) {
