@@ -60,4 +60,11 @@ export async function getHotPocketComboCount({
       seasoning_style,
     });
   return { count: count ?? 0, error };
+}
+
+export async function getTotalHotPocketCount() {
+  const { count, error } = await supabase
+    .from('hot_pocket_creations')
+    .select('id', { count: 'exact', head: true });
+  return { count: count ?? 0, error };
 } 

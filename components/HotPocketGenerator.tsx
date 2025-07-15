@@ -8,7 +8,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { useTheme } from "next-themes";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { storeHotPocketCreation, getHotPocketComboCount } from "@/lib/hotPocketDb";
+import { storeHotPocketCreation, getHotPocketComboCount, getTotalHotPocketCount } from "@/lib/hotPocketDb";
 
 const categories = [
   { key: "breakfast", label: "Breakfast" },
@@ -431,6 +431,7 @@ const HotPocketGenerator: React.FC = () => {
   const [isCompact, setIsCompact] = useState(false);
   const [isNarrow, setIsNarrow] = useState(false);
   const [comboCount, setComboCount] = useState<number | null>(null);
+  const [totalBakes, setTotalBakes] = useState<number | null>(null);
   useEffect(() => {
     const check = () => {
       setIsCompact(window.innerWidth <= 991);
@@ -491,6 +492,9 @@ const HotPocketGenerator: React.FC = () => {
       seasoning_style: seasoningStyle,
     });
     setComboCount(count);
+    // Fetch total bakes
+    const { count: totalCount } = await getTotalHotPocketCount();
+    setTotalBakes(totalCount);
     setShowResult(true);
   };
 
@@ -644,9 +648,11 @@ const HotPocketGenerator: React.FC = () => {
                 }}
               >
                 {comboCount > 1
-                  ? `we've baked this one ${comboCount} times before`
+                  ? `we've baked this one ${comboCount} times before${totalBakes !== null ? ` (out of ${totalBakes} total bakes so far)` : ''}`
                   : comboCount === 1
-                    ? "(first time we've baked this)"
+                    ? (totalBakes !== null
+                        ? `(first time we've baked this out of ${totalBakes} total bakes so far)`
+                        : "(first time we've baked this)")
                     : null}
               </div>
             )}
