@@ -381,17 +381,26 @@ const ReelSystem = memo(function ReelSystem({
                 <div className="flex flex-col items-center mt-2" style={{ height: isCompact ? 19 : 23 }} />
               ) : (
                 <div className="flex flex-col items-center mt-2">
-                  <div className="flex items-center gap-2">
-                    <Switch
-                      id={`lock-toggle-${i}`}
-                      checked={locked[i]}
-                      onCheckedChange={checked => setLocked(l => l.map((v, idx) => idx === i ? checked : v))}
-                      className="data-[state=checked]:bg-primary data-[state=unchecked]:bg-input border border-gray-300 dark:border-accent"
-                    />
-                    <Label htmlFor={`lock-toggle-${i}`} className="text-xs font-medium select-none text-muted-foreground dark:text-gray-300">
-                      locked on
-                    </Label>
-                  </div>
+                  <TooltipProvider delayDuration={0}>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <div className="flex items-center gap-2">
+                          <Switch
+                            id={`lock-toggle-${i}`}
+                            checked={locked[i]}
+                            onCheckedChange={checked => setLocked(l => l.map((v, idx) => idx === i ? checked : v))}
+                            className="data-[state=checked]:bg-primary data-[state=unchecked]:bg-input border border-gray-300 dark:border-accent"
+                          />
+                          <Label htmlFor={`lock-toggle-${i}`} className="text-xs font-medium select-none text-muted-foreground dark:text-gray-300">
+                            locked on
+                          </Label>
+                        </div>
+                      </TooltipTrigger>
+                      <TooltipContent className="bg-black">
+                        <span>locked reels hit every time</span>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
                 </div>
               )}
             </div>
