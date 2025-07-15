@@ -8,6 +8,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { useTheme } from "next-themes";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { storeHotPocketCreation, getHotPocketComboCount } from "@/lib/hotPocketDb";
 
 const categories = [
   { key: "breakfast", label: "Breakfast" },
@@ -340,7 +341,7 @@ const ReelSystem = memo(function ReelSystem({
   };
 
   return (
-    <div className="flex flex-col gap-6 mt-6">
+    <div className="flex flex-col gap-4 mt-6">
       <div className="relative grid grid-cols-4 gap-5 justify-center place-items-center mx-auto">
         {/* Center line indicator - spans across entire panel behind reels */}
         <div className="pointer-events-none absolute z-0 h-0.5 bg-muted-foreground/60" style={{
@@ -398,16 +399,16 @@ const ReelSystem = memo(function ReelSystem({
         })}
       </div>
       
-      <div className="flex gap-4 mt-4 justify-center">
+      <div className="flex gap-4 mt-2 justify-center">
         <Button
-          className="bg-primary text-black hover:bg-primary/80"
+          className="bg-primary text-black hover:bg-primary/80 px-[22px] py-[18px]"
           onClick={handleBake}
           disabled={isBaking}
         >
           {isBaking ? "Baking..." : "Bake @350°"}
         </Button>
         <Button
-          className="transition-colors bg-secondary hover:bg-secondary/70 text-black dark:text-white"
+          className="transition-colors bg-secondary hover:bg-secondary/70 text-black dark:text-white px-[22px] py-[18px]"
           onClick={handleStartOver}
         >
           Start Over
@@ -429,6 +430,7 @@ const HotPocketGenerator: React.FC = () => {
   // Responsive: 991px and below
   const [isCompact, setIsCompact] = useState(false);
   const [isNarrow, setIsNarrow] = useState(false);
+  const [comboCount, setComboCount] = useState<number | null>(null);
   useEffect(() => {
     const check = () => {
       setIsCompact(window.innerWidth <= 991);
@@ -459,9 +461,36 @@ const HotPocketGenerator: React.FC = () => {
     setShowResult(false);
   };
 
-  const handleBakeClick = (hitItems: HitIngredient[], seasoningStyle: string) => {
+  const handleBakeClick = async (hitItems: HitIngredient[], seasoningStyle: string) => {
     hitItemsRef.current = hitItems;
     seasoningStyleRef.current = seasoningStyle;
+    // Extract combo details
+    const base = hitItems[0]?.name || '';
+    const modifier = hitItems[1]?.name || '';
+    const crust = hitItems[2]?.name || '';
+    const seasoning = hitItems[3]?.name || '';
+    const category = selectedCategory || '';
+    const user_id = undefined; // Set if you have user auth
+    // 1. Store the creation
+    await storeHotPocketCreation({
+      category,
+      base,
+      modifier,
+      crust,
+      seasoning,
+      seasoning_style: seasoningStyle,
+      user_id,
+    });
+    // 2. Get the count of this combo
+    const { count } = await getHotPocketComboCount({
+      category,
+      base,
+      modifier,
+      crust,
+      seasoning,
+      seasoning_style: seasoningStyle,
+    });
+    setComboCount(count);
     setShowResult(true);
   };
 
@@ -532,12 +561,13 @@ const HotPocketGenerator: React.FC = () => {
         onClick={() => setShowResult(false)}
       >
         <div
-          className="fixed left-1/2 z-[10000] bg-background border rounded-2xl p-8 text-center w-[750px] max-w-[750px] pointer-events-auto"
+          className="fixed left-1/2 z-[10000] bg-background border rounded-2xl p-8 pt-8 text-center w-[750px] max-w-[750px] pointer-events-auto overflow-y-auto"
           style={{
-            top: '25px',
+            top: 0,
             opacity: visible ? 1 : 0,
             transform: visible ? 'translate(-50%, 0)' : 'translate(-50%, 80px)',
             transition: 'opacity 0.7s cubic-bezier(0.4,0,0.2,1), transform 0.7s cubic-bezier(0.4,0,0.2,1)',
+            maxHeight: '100vh',
           }}
           onClick={e => e.stopPropagation()}
         >
@@ -563,7 +593,26 @@ const HotPocketGenerator: React.FC = () => {
               className="object-contain"
             />
           </div>
-          <h2 className="text-[29px] font-bold mb-4">Your Hot Pocket is ready!</h2>
+          <h2 className="text-[29px] font-bold mb-1">Your Hot Pocket is ready!</h2>
+          {/* Combo count message */}
+          {comboCount !== null && (
+            <div
+              className="mb-4"
+              style={{
+                fontSize: '1rem', // 2px larger than before (0.875rem + 2px ≈ 1rem)
+                fontWeight: 'normal',
+                color: isLightMode ? 'black' : 'white',
+                opacity: 0.65, // 65% brightness (15% brighter than before)
+                transition: 'opacity 0.2s',
+              }}
+            >
+              {comboCount > 1
+                ? `This combination has hit ${comboCount} times before!`
+                : comboCount === 1
+                  ? "First time this combo has ever hit!"
+                  : null}
+            </div>
+          )}
           <div className="flex flex-col gap-6">
             <div className="text-3xl font-bold mb-2">
               <div>
@@ -601,7 +650,7 @@ const HotPocketGenerator: React.FC = () => {
                 })()}
               </div>
             </div>
-            <div className={isLightMode ? "text-base text-black" : "text-base text-white"}>
+            <div className="text-base text-primary">
               *{hitItemsRef.current[0]?.ingredientList?.map(ingredient => ingredient.toLowerCase()).join(", ")}
             </div>
             <div className="flex gap-4 justify-center mt-6">
@@ -667,8 +716,8 @@ const HotPocketGenerator: React.FC = () => {
         <DialogContent
           className={
             isNarrow
-              ? "mt-5 max-h-[calc(100vh-40px)] rounded-2xl p-2 xs:p-8 py-8 xs:py-16 text-center"
-              : "w-[calc(100vw-200px)] max-w-[calc(100vw-200px)] mt-5 max-h-[calc(100vh-40px)] rounded-2xl p-8 py-16 text-center"
+              ? "max-h-[calc(100vh-40px)] rounded-2xl p-2 xs:p-8 pt-8 pb-8 xs:pt-8 xs:pb-16 text-center"
+              : "w-[calc(100vw-200px)] max-w-[calc(100vw-200px)] max-h-[calc(100vh-40px)] rounded-2xl p-8 pt-8 pb-16 text-center"
           }
           style={
             isNarrow
@@ -679,9 +728,6 @@ const HotPocketGenerator: React.FC = () => {
           <DialogTitle className="text-center" style={{ fontSize: '2.25rem', lineHeight: '2.5rem', fontWeight: 700 }}>
             Hot Pocket Generator
           </DialogTitle>
-          <DialogDescription className="text-center">
-            192,000 possible flavor combinations! Most of them make sense.
-          </DialogDescription>
           {!selectedCategory ? (
             <div className="flex gap-5 mt-6 justify-center">
               {categories.map((cat) => (
