@@ -594,25 +594,6 @@ const HotPocketGenerator: React.FC = () => {
             />
           </div>
           <h2 className="text-[29px] font-bold mb-1">Your Hot Pocket is ready!</h2>
-          {/* Combo count message */}
-          {comboCount !== null && (
-            <div
-              className="mb-4"
-              style={{
-                fontSize: '1rem', // 2px larger than before (0.875rem + 2px ≈ 1rem)
-                fontWeight: 'normal',
-                color: isLightMode ? 'black' : 'white',
-                opacity: 0.65, // 65% brightness (15% brighter than before)
-                transition: 'opacity 0.2s',
-              }}
-            >
-              {comboCount > 1
-                ? `This combination has hit ${comboCount} times before!`
-                : comboCount === 1
-                  ? "First time this combo has ever hit!"
-                  : null}
-            </div>
-          )}
           <div className="flex flex-col gap-6">
             <div className="text-3xl font-bold mb-2">
               <div>
@@ -653,7 +634,26 @@ const HotPocketGenerator: React.FC = () => {
             <div className="text-base text-primary">
               *{hitItemsRef.current[0]?.ingredientList?.map(ingredient => ingredient.toLowerCase()).join(", ")}
             </div>
-            <div className="flex gap-4 justify-center mt-6">
+            {/* Combo count message moved here, above the Bake Another button */}
+            {comboCount !== null && (
+              <div
+                className="mb-1"
+                style={{
+                  fontSize: '1rem',
+                  fontWeight: 'normal',
+                  color: isLightMode ? 'black' : 'white',
+                  opacity: 0.65,
+                  transition: 'opacity 0.2s',
+                }}
+              >
+                {comboCount > 1
+                  ? `we've baked this one ${comboCount} times before`
+                  : comboCount === 1
+                    ? "(first time we've baked this)"
+                    : null}
+              </div>
+            )}
+            <div className="flex gap-4 justify-center mt-2">
               <Button className="bg-primary text-black hover:bg-primary/80" onClick={handleNext}>Bake Another</Button>
             </div>
           </div>
