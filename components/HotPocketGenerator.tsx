@@ -405,7 +405,7 @@ const ReelSystem = memo(function ReelSystem({
           onClick={handleBake}
           disabled={isBaking}
         >
-          {isBaking ? "Baking..." : "Bake @350°"}
+          {isBaking ? "Baking..." : "Spin the reels and bake @350°"}
         </Button>
         <Button
           className="transition-colors bg-secondary hover:bg-secondary/70 text-black dark:text-white px-[22px] py-[18px]"
