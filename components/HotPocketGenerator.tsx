@@ -557,18 +557,15 @@ const HotPocketGenerator: React.FC = () => {
 
     return createPortal(
       <div
-        className="fixed top-0 left-0 right-0 bottom-0 z-[9999] bg-black/50 pointer-events-auto"
+        className="fixed top-0 left-0 right-0 bottom-0 z-[9999] bg-black/50 pointer-events-auto pl-[100px] pr-[100px]"
         onClick={() => setShowResult(false)}
       >
         <div
-          className="fixed left-1/2 z-[10000] bg-background border rounded-2xl p-8 pt-8 text-center w-[750px] max-w-[750px] pointer-events-auto overflow-y-auto"
-          style={{
-            top: 0,
-            opacity: visible ? 1 : 0,
-            transform: visible ? 'translate(-50%, 0)' : 'translate(-50%, 80px)',
-            transition: 'opacity 0.7s cubic-bezier(0.4,0,0.2,1), transform 0.7s cubic-bezier(0.4,0,0.2,1)',
-            maxHeight: '100vh',
-          }}
+          className="fixed left-1/2 -translate-x-1/2 z-[10000] bg-background border rounded-2xl p-8 pt-8 text-center w-full pointer-events-auto overflow-y-auto"
+          style={window.innerWidth <= 991
+            ? { width: '100vw', maxWidth: '100vw', top: 0, opacity: visible ? 1 : 0, transform: visible ? 'translate(-50%, 0)' : 'translate(-50%, 80px)', transition: 'opacity 0.7s cubic-bezier(0.4,0,0.2,1), transform 0.7s cubic-bezier(0.4,0,0.2,1)', maxHeight: '100vh' }
+            : { maxWidth: '750px', top: 0, opacity: visible ? 1 : 0, transform: visible ? 'translate(-50%, 0)' : 'translate(-50%, 80px)', transition: 'opacity 0.7s cubic-bezier(0.4,0,0.2,1), transform 0.7s cubic-bezier(0.4,0,0.2,1)', maxHeight: '100vh' }
+          }
           onClick={e => e.stopPropagation()}
         >
           {/* Close button as X in upper right corner */}
@@ -709,24 +706,16 @@ const HotPocketGenerator: React.FC = () => {
               </DialogTrigger>
             </TooltipTrigger>
             <TooltipContent className="bg-black">
-              <span>Hot Pocket Generator</span>
+              <span>Hot Pocket Flav-O-Matic<sup>™</sup> v1.0</span>
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
         <DialogContent
-          className={
-            isNarrow
-              ? "max-h-[calc(100vh-40px)] rounded-2xl p-2 xs:p-8 pt-8 pb-8 xs:pt-8 xs:pb-16 text-center"
-              : "w-[calc(100vw-200px)] max-w-[calc(100vw-200px)] max-h-[calc(100vh-40px)] rounded-2xl p-8 pt-8 pb-16 text-center"
-          }
-          style={
-            isNarrow
-              ? { width: '100vw', maxWidth: '100vw', margin: '0 auto' }
-              : undefined
-          }
+          className="w-full max-h-[calc(100vh-40px)] rounded-2xl p-2 xs:p-8 pt-8 pb-8 xs:pt-8 xs:pb-16 text-center"
+          style={isCompact ? { width: '100vw', maxWidth: '100vw' } : { maxWidth: '1200px' }}
         >
           <DialogTitle className="text-center" style={{ fontSize: '2.25rem', lineHeight: '2.5rem', fontWeight: 700 }}>
-            Hot Pocket Generator
+            Hot Pocket Flav-O-Matic<sup>™</sup> <span style={{ fontSize: '50%', opacity: 0.5, verticalAlign: 'middle' }}>v1.0</span>
           </DialogTitle>
           {!selectedCategory ? (
             <div className="flex gap-5 mt-6 justify-center">
