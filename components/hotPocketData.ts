@@ -88,7 +88,7 @@ const hotPocketData: HotPocketData = {
       { name: "Vegan Everything Bagel", weight: 10, ingredientList: ["tofu egg", "vegan ham", "vegan cheddar", "everything bagel crust"] }
     ],
     modifier: [
-      { name: "None", weight: 1500 },
+      { name: "None", weight: 2620 },
       { name: "Cream cheese", weight: 50 },
       { name: "Chives", weight: 40 },
       { name: "Shredded cheddar", weight: 50 },
@@ -122,7 +122,7 @@ const hotPocketData: HotPocketData = {
       { name: "Crispy fried shallots", weight: 20 },
     ],
     crust: [
-      { name: "Original", weight: 600 },
+      { name: "Original", weight: 560 },
       { name: "Croissant", weight: 30 },
       { name: "Pretzel", weight: 20 },
       { name: "Extra crispy", weight: 30 },
@@ -132,7 +132,7 @@ const hotPocketData: HotPocketData = {
       { name: "Sourdough", weight: 10 },
     ],
     seasoning: [
-      { name: "None", weight: 1400 },
+      { name: "None", weight: 1280 },
       { name: "Cracked black pepper", weight: 30 },
       { name: "Crushed red pepper", weight: 30 },
       { name: "Ranch", weight: 20, person: "Greg" },
@@ -215,7 +215,7 @@ const hotPocketData: HotPocketData = {
       { name: "Vegan Sweet Potato & Black Bean Fajita", weight: 10, ingredientList: ["roasted sweet potato", "black beans", "fajita peppers", "avocado crema"] }
     ],
     modifier: [
-      { name: "None", weight: 1450 },
+      { name: "None", weight: 1620 },
       { name: "Caramelized onions", weight: 30 },
       { name: "Crumbled bacon", weight: 30 },
       { name: "Roasted red peppers", weight: 20 },
@@ -243,7 +243,7 @@ const hotPocketData: HotPocketData = {
       { name: "Sautéed mushrooms", weight: 20 },
     ],
     crust: [
-      { name: "Original", weight: 600 },
+      { name: "Original", weight: 560 },
       { name: "Croissant", weight: 30 },
       { name: "Pretzel", weight: 20 },
       { name: "Extra crispy", weight: 30 },
@@ -253,7 +253,7 @@ const hotPocketData: HotPocketData = {
       { name: "Sourdough", weight: 10 },
     ],
     seasoning: [
-      { name: "None", weight: 1400 },
+      { name: "None", weight: 1300 },
       { name: "Garlic butter parmesan", weight: 20, person: "Greg" },
       { name: "Italian herb", weight: 30 },
       { name: "Cracked black pepper", weight: 30 },
@@ -330,7 +330,7 @@ const hotPocketData: HotPocketData = {
       { name: "Holiday Edition: Chocolate Chestnut Cream", weight: 10, ingredientList: ["chestnut purée", "chocolate ganache", "whipped cream center"] }
     ],
     modifier: [
-      { name: "None", weight: 1500 },
+      { name: "None", weight: 2260 },
       { name: "Whipped cream", weight: 20 },
       { name: "Cream cheese", weight: 30 },
       { name: "Marshmallow fluff", weight: 30 }, 
@@ -364,7 +364,7 @@ const hotPocketData: HotPocketData = {
       { name: "Brownie crumbles", weight: 20 },
     ],
     crust: [
-      { name: "Original", weight: 600 },
+      { name: "Original", weight: 560 },
       { name: "Croissant", weight: 30 },
       { name: "Pretzel", weight: 20 },
       { name: "Extra crispy", weight: 30 },
@@ -374,7 +374,7 @@ const hotPocketData: HotPocketData = {
       { name: "Sourdough", weight: 10 },
     ],
     seasoning: [
-      { name: "None", weight: 1400 },
+      { name: "None", weight: 1080 },
       { name: "Cinnamon sugar dust", weight: 20 },
       { name: "Powdered sugar glaze", weight: 20, person: "Greg" },
       { name: "Salted Caramel sugar", weight: 20 },
