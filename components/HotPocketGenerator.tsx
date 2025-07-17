@@ -18,10 +18,10 @@ const categories = [
 
 const bandNames = ["Base", "Modifier", "Crust", "Seasoning"];
 const bandLabels: Record<string, string> = {
-  Base: "The Pocket",
-  Modifier: "The Special Ingredient",
-  Crust: "The Crust",
-  Seasoning: "The Seasoning"
+  Base: "Hot Pocket",
+  Modifier: "Special Ingredient",
+  Crust: "Special Crust",
+  Seasoning: "Special Seasoning"
 };
 
 // Weighted random selection utility
@@ -46,19 +46,93 @@ const seasoningStyles = [
 // @ts-ignore
 interface HitIngredient extends Ingredient { isHit?: boolean; }
 
+// Utility to darken a hex color by a given factor (0-1)
+function darkenHexColor(hex: string, factor: number) {
+  // Remove # if present
+  hex = hex.replace('#', '');
+  // Parse r, g, b
+  let r = parseInt(hex.substring(0, 2), 16);
+  let g = parseInt(hex.substring(2, 4), 16);
+  let b = parseInt(hex.substring(4, 6), 16);
+  // Apply factor
+  r = Math.round(r * factor);
+  g = Math.round(g * factor);
+  b = Math.round(b * factor);
+  return `rgb(${r}, ${g}, ${b})`;
+}
+
+// Utility to lighten a hex color by a given factor (0-1)
+function lightenHexColor(hex: string, factor: number) {
+  hex = hex.replace('#', '');
+  let r = parseInt(hex.substring(0, 2), 16);
+  let g = parseInt(hex.substring(2, 4), 16);
+  let b = parseInt(hex.substring(4, 6), 16);
+  // Blend with white
+  r = Math.round(r + (255 - r) * factor);
+  g = Math.round(g + (255 - g) * factor);
+  b = Math.round(b + (255 - b) * factor);
+  return `rgb(${r}, ${g}, ${b})`;
+}
+
+// Utility to blend an RGB color string with black by a given factor (0-1)
+function darkenRgbColor(rgb: string, factor: number) {
+  // rgb(r, g, b)
+  const match = rgb.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/);
+  if (!match) return rgb;
+  let r = parseInt(match[1], 10);
+  let g = parseInt(match[2], 10);
+  let b = parseInt(match[3], 10);
+  r = Math.round(r * (1 - factor));
+  g = Math.round(g * (1 - factor));
+  b = Math.round(b * (1 - factor));
+  return `rgb(${r}, ${g}, ${b})`;
+}
+
+// Utility to blend a color (hex or rgb) with white by a given factor (0-1)
+function blendWithWhite(color: string, factor: number) {
+  let r, g, b;
+  if (color.startsWith('#')) {
+    color = color.replace('#', '');
+    r = parseInt(color.substring(0, 2), 16);
+    g = parseInt(color.substring(2, 4), 16);
+    b = parseInt(color.substring(4, 6), 16);
+  } else {
+    // rgb(r, g, b)
+    const match = color.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/);
+    if (!match) return color;
+    r = parseInt(match[1], 10);
+    g = parseInt(match[2], 10);
+    b = parseInt(match[3], 10);
+  }
+  r = Math.round(r + (255 - r) * factor);
+  g = Math.round(g + (255 - g) * factor);
+  b = Math.round(b + (255 - b) * factor);
+  return `rgb(${r}, ${g}, ${b})`;
+}
+
 // Standalone Reel System Component - Completely isolated
 const ReelSystem = memo(function ReelSystem({ 
   categoryData, 
   onBakeClick,
   onNext,
+  onBakeStart,
   resolvedTheme,
-  isCompact
+  isCompact,
+  lockTogglesDisabled,
+  locked,
+  setLocked,
+  categoryColor
 }: { 
   categoryData: any;
   onBakeClick: (hitItems: HitIngredient[], seasoningStyle: string) => void;
   onNext: () => void;
+  onBakeStart: () => void;
   resolvedTheme: string | undefined;
   isCompact: boolean;
+  lockTogglesDisabled: boolean;
+  locked: boolean[];
+  setLocked: React.Dispatch<React.SetStateAction<boolean[]>>;
+  categoryColor?: string;
 }) {
   const outerBorderWidth = isCompact ? 2 : 4;
 
@@ -78,10 +152,6 @@ const ReelSystem = memo(function ReelSystem({
   const reelRefs = useRef<(HTMLDivElement | null)[]>([]);
   const isAnimationCompleteRef = useRef(false);
   const modalTimerRef = useRef<NodeJS.Timeout | null>(null);
-
-  // Add state for lock toggles (Modifier, Crust, Seasoning)
-  // [Base, Modifier, Crust, Seasoning] - only Modifier (1), Crust (2), Seasoning (3) are lockable
-  const [locked, setLocked] = useState([false, false, false, false]);
 
   // Helper function to shuffle an array
   const shuffleArray = (array: Ingredient[]) => {
@@ -114,7 +184,7 @@ const ReelSystem = memo(function ReelSystem({
   }, [categoryData]);
 
   // Memoized Reel component
-  const Reel = memo(function Reel({ items, selectedIdx, greyed, bandName, reelIndex, resolvedTheme, isCompact, locked }: { 
+  const Reel = memo(function Reel({ items, selectedIdx, greyed, bandName, reelIndex, resolvedTheme, isCompact, locked, categoryColor }: { 
     items: HitIngredient[];
     selectedIdx: number; 
     greyed: boolean; 
@@ -123,8 +193,18 @@ const ReelSystem = memo(function ReelSystem({
     resolvedTheme: string | undefined;
     isCompact: boolean;
     locked: boolean;
+    categoryColor?: string;
   }) {
-    const borderColor = locked ? '#fbbf24' : 'hsl(var(--border))';
+    let borderColor = 'hsl(var(--border))';
+    if (bandName === 'Base' && categoryColor) {
+      // Always use the main category color for the first reel border
+      if (categoryColor === '#d5693f') borderColor = '#d5693f'; // breakfast
+      else if (categoryColor === '#b92638') borderColor = '#b92638'; // dinner
+      else if (categoryColor === '#6a3253') borderColor = '#6a3253'; // dessert
+      else borderColor = categoryColor;
+    } else {
+      borderColor = locked ? '#fbbf24' : 'hsl(var(--border))';
+    }
     const isLightMode = resolvedTheme === "light";
     const outerBorderWidthLocal = isCompact ? 2 : 4;
     const itemWidth = isCompact ? 140 : 200;
@@ -151,7 +231,24 @@ const ReelSystem = memo(function ReelSystem({
         >
           <div className="w-full">
             {items.map((item, idx) => {
-              const backgroundColor = isLightMode ? 'white' : 'black';
+              let backgroundColor = isLightMode ? 'white' : 'black';
+              if (bandName === 'Base' && categoryColor) {
+                  if (isLightMode) {
+                    // Use new exact colors for light mode
+                    if (categoryColor === '#d5693f') backgroundColor = '#ffad8c'; // breakfast
+                    else if (categoryColor === '#b92638') backgroundColor = '#ffb3bd'; // dinner
+                    else if (categoryColor === '#6a3253') backgroundColor = '#ffc2e6'; // dessert
+                    else backgroundColor = categoryColor;
+                  } else {
+                    // Darken by 50% in dark mode, then decrease luminance by 30%
+                    let darkened = darkenHexColor(categoryColor, 0.5);
+                    backgroundColor = darkenRgbColor(darkened, 0.3);
+                  }
+                }
+              // Increase luminance of all reel backgrounds by 40%, but only in light mode
+              if (isLightMode) {
+                backgroundColor = blendWithWhite(backgroundColor, 0.4);
+              }
               return (
                 <div
                   key={`${item.name}-${idx}`}
@@ -161,9 +258,13 @@ const ReelSystem = memo(function ReelSystem({
                     maxHeight: itemHeight,
                     height: itemHeight,
                     backgroundColor,
-                    borderColor: 'hsl(var(--border)/0.5)',
+                    // For light mode, use black with 20% transparency; for dark mode, keep as is
+                    borderColor:
+                      isLightMode
+                        ? 'rgba(0,0,0,0.2)'
+                        : 'rgba(255,255,255,0.305)',
                     borderStyle: 'dashed',
-                    borderWidth: '0 0 3px 0',
+                    borderWidth: '0 0 2px 0',
                   }}
                 >
                   <div className="w-16 h-16 rounded mb-2 flex items-center justify-center mx-auto">
@@ -242,6 +343,7 @@ const ReelSystem = memo(function ReelSystem({
 
   const handleBake = () => {
     // 1) User clicks bake
+    if (onBakeStart) onBakeStart();
     setIsBaking(true);
 
     // 2) System determines weighted random items
@@ -342,44 +444,74 @@ const ReelSystem = memo(function ReelSystem({
 
   return (
     <div className="flex flex-col gap-4 mt-6">
-      <div className="relative grid grid-cols-4 gap-5 justify-center place-items-center mx-auto">
+      <div className="relative flex flex-row justify-center items-stretch w-full">
         {/* Center line indicator - spans across entire panel behind reels */}
-        <div className="pointer-events-none absolute z-0 h-0.5 bg-muted-foreground/60" style={{
-          left: '-100px',
-          right: '-100px',
-          top: 'calc(50% + 3px)',
-          transform: 'translateY(-50%)'
-        }} />
-        {bandNames.map((band, i) => {
-          const bandKey = band.toLowerCase() as keyof HotPocketData["breakfast"];
-          const bandData = categoryData![bandKey];
-          const selectedIdx = selectedIndices[i];
-          const isNone = band !== "Base" && bandData[selectedIdx].name === "None";
-          return (
-            <div
-              key={band}
-              className="flex flex-col items-center rounded-lg min-h-[180px] text-card-foreground"
-            >
+        <div className="pointer-events-none absolute z-0 h-0.5 bg-muted-foreground/60 w-full" style={{ top: 'calc(50% + 3px)', left: 0, right: 0, transform: 'translateY(-50%)' }} />
+        {/* First Reel */}
+        <div className="flex flex-col items-center rounded-lg min-h-[180px] text-card-foreground">
+          <div
+            className="font-bold mb-2 text-center"
+            style={isCompact ? { fontSize: '0.75rem', lineHeight: '1rem' } : { fontSize: '1rem', lineHeight: '1.25rem' }}
+          >
+            {bandLabels[bandNames[0]]}
+          </div>
+          <Reel
+            items={reelItemsList[0] as HitIngredient[]}
+            selectedIdx={selectedIndices[0]}
+            greyed={false}
+            bandName={bandNames[0]}
+            reelIndex={0}
+            resolvedTheme={resolvedTheme}
+            isCompact={isCompact}
+            locked={locked[0]}
+            categoryColor={categoryColor}
+          />
+          <div className="flex flex-col items-center mt-2" style={{ height: isCompact ? 19 : 23 }} />
+        </div>
+        {/* Vertical Separator */}
+        <div className="flex justify-center items-stretch mx-4">
+          {/* For light mode, use black with 20% transparency; for dark mode, keep as is */}
+          <div
+            style={{
+              minHeight: 320,
+              alignSelf: 'stretch',
+              width: '1px',
+              background:
+                resolvedTheme === 'light'
+                  ? 'rgba(0,0,0,0.2)'
+                  : 'rgba(255,255,255,0.47)',
+            }}
+          />
+        </div>
+        {/* Other Three Reels */}
+        <div className="flex flex-row gap-5">
+          {[1, 2, 3].map(i => {
+            const band = bandNames[i];
+            const bandKey = band.toLowerCase() as keyof HotPocketData["breakfast"];
+            const bandData = categoryData![bandKey];
+            const selectedIdx = selectedIndices[i];
+            const isNone = band !== "Base" && bandData[selectedIdx].name === "None";
+            return (
               <div
-                className="font-bold mb-2 text-center"
-                style={isCompact ? { fontSize: '0.75rem', lineHeight: '1rem' } : { fontSize: '1rem', lineHeight: '1.25rem' }}
+                key={band}
+                className="flex flex-col items-center rounded-lg min-h-[180px] text-card-foreground"
               >
-                {bandLabels[band]}
-              </div>
-              <Reel
-                items={reelItemsList[i] as HitIngredient[]} // Cast to HitIngredient[]
-                selectedIdx={selectedIndices[i]}
-                greyed={isNone}
-                bandName={band}
-                reelIndex={i}
-                resolvedTheme={resolvedTheme}
-                isCompact={isCompact}
-                locked={locked[i]}
-              />
-              {/* Add lock toggle for Modifier, Crust, Seasoning; add spacer for Base */}
-              {i === 0 ? (
-                <div className="flex flex-col items-center mt-2" style={{ height: isCompact ? 19 : 23 }} />
-              ) : (
+                <div
+                  className="font-bold mb-2 text-center"
+                  style={isCompact ? { fontSize: '0.75rem', lineHeight: '1rem' } : { fontSize: '1rem', lineHeight: '1.25rem' }}
+                >
+                  {bandLabels[band]}
+                </div>
+                <Reel
+                  items={reelItemsList[i] as HitIngredient[]}
+                  selectedIdx={selectedIndices[i]}
+                  greyed={isNone}
+                  bandName={band}
+                  reelIndex={i}
+                  resolvedTheme={resolvedTheme}
+                  isCompact={isCompact}
+                  locked={locked[i]}
+                />
                 <div className="flex flex-col items-center mt-2">
                   <TooltipProvider delayDuration={0}>
                     <Tooltip>
@@ -390,6 +522,7 @@ const ReelSystem = memo(function ReelSystem({
                             checked={locked[i]}
                             onCheckedChange={checked => setLocked(l => l.map((v, idx) => idx === i ? checked : v))}
                             className="data-[state=checked]:bg-primary data-[state=unchecked]:bg-input border border-gray-300 dark:border-accent"
+                            disabled={lockTogglesDisabled}
                           />
                           <Label htmlFor={`lock-toggle-${i}`} className="text-xs font-medium select-none text-muted-foreground dark:text-gray-300">
                             locked on
@@ -397,15 +530,15 @@ const ReelSystem = memo(function ReelSystem({
                         </div>
                       </TooltipTrigger>
                       <TooltipContent className="bg-black">
-                        <span>locked reels hit every time</span>
+                        <span>locked on reels increase their hit chances from ~20% to 100%</span>
                       </TooltipContent>
                     </Tooltip>
                   </TooltipProvider>
                 </div>
-              )}
-            </div>
-          );
-        })}
+              </div>
+            );
+          })}
+        </div>
       </div>
       
       <div className="flex gap-4 mt-2 justify-center">
@@ -420,15 +553,18 @@ const ReelSystem = memo(function ReelSystem({
           className="transition-colors bg-secondary hover:bg-secondary/70 text-black dark:text-white px-[22px] py-[18px]"
           onClick={handleStartOver}
         >
-          Start Over
+          Bake Another
         </Button>
       </div>
     </div>
   );
 }, (prevProps, nextProps) => {
-  // Only re-render if categoryData changes
-  // Ignore onBakeClick changes to prevent re-renders when modal state changes
-  return prevProps.categoryData === nextProps.categoryData;
+  // Only re-render if categoryData, locked, or lockTogglesDisabled changes
+  return (
+    prevProps.categoryData === nextProps.categoryData &&
+    prevProps.locked.join(',') === nextProps.locked.join(',') &&
+    prevProps.lockTogglesDisabled === nextProps.lockTogglesDisabled
+  );
 });
 
 const HotPocketGenerator: React.FC = () => {
@@ -441,6 +577,9 @@ const HotPocketGenerator: React.FC = () => {
   const [isNarrow, setIsNarrow] = useState(false);
   const [comboCount, setComboCount] = useState<number | null>(null);
   const [totalBakes, setTotalBakes] = useState<number | null>(null);
+  // Add lock toggles state here
+  const [locked, setLocked] = useState([false, false, false, false]);
+  const [lockTogglesDisabled, setLockTogglesDisabled] = useState(false);
   useEffect(() => {
     const check = () => {
       setIsCompact(window.innerWidth <= 991);
@@ -460,11 +599,13 @@ const HotPocketGenerator: React.FC = () => {
   const handleCategorySelect = (category: string) => {
     setSelectedCategory(category);
     setShowResult(false);
+    setLockTogglesDisabled(false);
   };
 
   const handleNext = () => {
     setSelectedCategory(null);
     setShowResult(false);
+    setLockTogglesDisabled(false);
   };
 
   const handleCloseResult = () => {
@@ -507,7 +648,19 @@ const HotPocketGenerator: React.FC = () => {
     setShowResult(true);
   };
 
+  const handleBakeStart = () => {
+    setLockTogglesDisabled(true);
+  };
+
   const categoryData = selectedCategory ? hotPocketData[selectedCategory] : null;
+
+  // In HotPocketGenerator, determine the category color
+  const getCategoryColor = (category: string | null) => {
+    if (category === 'breakfast') return '#d5693f';
+    if (category === 'dinner') return '#b92638';
+    if (category === 'dessert') return '#6a3253';
+    return undefined;
+  };
 
   // Result formatting
   function getResultText(hitItems: HitIngredient[], seasoningStyle: string) {
@@ -577,7 +730,7 @@ const HotPocketGenerator: React.FC = () => {
           className="fixed left-1/2 -translate-x-1/2 z-[10000] bg-background border rounded-2xl p-8 pt-8 text-center w-full pointer-events-auto overflow-y-auto"
           style={window.innerWidth <= 991
             ? { width: '100vw', maxWidth: '100vw', top: 0, opacity: visible ? 1 : 0, transform: visible ? 'translate(-50%, 0)' : 'translate(-50%, 80px)', transition: 'opacity 0.7s cubic-bezier(0.4,0,0.2,1), transform 0.7s cubic-bezier(0.4,0,0.2,1)', maxHeight: '100vh' }
-            : { maxWidth: '750px', top: 0, opacity: visible ? 1 : 0, transform: visible ? 'translate(-50%, 0)' : 'translate(-50%, 80px)', transition: 'opacity 0.7s cubic-bezier(0.4,0,0.2,1), transform 0.7s cubic-bezier(0.4,0,0.2,1)', maxHeight: '100vh' }
+            : { maxWidth: '900px', top: 0, opacity: visible ? 1 : 0, transform: visible ? 'translate(-50%, 0)' : 'translate(-50%, 80px)', transition: 'opacity 0.7s cubic-bezier(0.4,0,0.2,1), transform 0.7s cubic-bezier(0.4,0,0.2,1)', maxHeight: '100vh' }
           }
           onClick={e => e.stopPropagation()}
         >
@@ -641,7 +794,7 @@ const HotPocketGenerator: React.FC = () => {
                 })()}
               </div>
             </div>
-            <div className="text-base text-primary">
+            <div className="text-base text-primary" style={{ fontSize: '1.25rem' }}>
               *{hitItemsRef.current[0]?.ingredientList?.map(ingredient => ingredient.toLowerCase()).join(", ")}
             </div>
             {/* Combo count message moved here, above the Bake Another button */}
@@ -649,7 +802,7 @@ const HotPocketGenerator: React.FC = () => {
               <div
                 className="mb-1"
                 style={{
-                  fontSize: '1rem',
+                  fontSize: '0.875rem', // 2px smaller than 1rem
                   fontWeight: 'normal',
                   color: isLightMode ? 'black' : 'white',
                   opacity: 0.65,
@@ -785,8 +938,13 @@ const HotPocketGenerator: React.FC = () => {
               categoryData={categoryData} 
               onBakeClick={handleBakeClick}
               onNext={handleNext}
+              onBakeStart={handleBakeStart}
               resolvedTheme={resolvedTheme}
               isCompact={isCompact}
+              lockTogglesDisabled={lockTogglesDisabled}
+              locked={locked}
+              setLocked={setLocked}
+              categoryColor={getCategoryColor(selectedCategory)}
             />
           )}
         </DialogContent>

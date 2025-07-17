@@ -122,7 +122,7 @@ const hotPocketData: HotPocketData = {
       { name: "Crispy fried shallots", weight: 20 },
     ],
     crust: [
-      { name: "Original", weight: 560 },
+      { name: "None", weight: 560 },
       { name: "Croissant", weight: 30 },
       { name: "Pretzel", weight: 20 },
       { name: "Extra crispy", weight: 30 },
@@ -243,7 +243,7 @@ const hotPocketData: HotPocketData = {
       { name: "Sautéed mushrooms", weight: 20 },
     ],
     crust: [
-      { name: "Original", weight: 560 },
+      { name: "None", weight: 560 },
       { name: "Croissant", weight: 30 },
       { name: "Pretzel", weight: 20 },
       { name: "Extra crispy", weight: 30 },
@@ -364,7 +364,7 @@ const hotPocketData: HotPocketData = {
       { name: "Brownie crumbles", weight: 20 },
     ],
     crust: [
-      { name: "Original", weight: 560 },
+      { name: "None", weight: 560 },
       { name: "Croissant", weight: 30 },
       { name: "Pretzel", weight: 20 },
       { name: "Extra crispy", weight: 30 },
