@@ -874,7 +874,7 @@ const HotPocketGenerator: React.FC = () => {
               </DialogTrigger>
             </TooltipTrigger>
             <TooltipContent className="bg-black">
-              <span>Hot Pocket Flav-O-Matic<sup>™</sup> v1.0</span>
+              <span>Hot Pocket Flave-O-Matic<sup>™</sup> v1.0</span>
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
@@ -883,7 +883,7 @@ const HotPocketGenerator: React.FC = () => {
           style={isCompact ? { width: '100vw', maxWidth: '100vw' } : { maxWidth: '1200px' }}
         >
           <DialogTitle className="text-center" style={{ fontSize: '2.25rem', lineHeight: '2.5rem', fontWeight: 700 }}>
-            Hot Pocket Flav-O-Matic<sup>™</sup> <span style={{ fontSize: '50%', opacity: 0.5, verticalAlign: 'middle' }}>v1.0</span>
+            Hot Pocket Flave-O-Matic<sup>™</sup> <span style={{ fontSize: '50%', opacity: 0.5, verticalAlign: 'middle' }}>v1.0</span>
           </DialogTitle>
           {!selectedCategory ? (
             <div className="flex gap-5 mt-6 justify-center">

@@ -11,8 +11,10 @@ import SuggestedMovies from "@/components/SuggestedMovies";
 import QueuedMovies from "@/components/QueuedMovies";
 import TopHundred from "@/components/TopHundred";
 import Insights from "@/components/Insights";
-import Tutorial from "@/components/Tutorial";
 import HotPocketGenerator from "@/components/HotPocketGenerator";
+import { useAuth } from "@/contexts/AuthContext";
+import Tutorial from "@/components/Tutorial";
+import Image from "next/image";
 
 interface Movie {
   id: number;
@@ -38,6 +40,15 @@ const HomePage: React.FC = () => {
   const [refreshKey, setRefreshKey] = useState(0);
   const [suggestedMoviesRefreshKey, setSuggestedMoviesRefreshKey] = useState(0);
   const [showTutorial, setShowTutorial] = useState(false);
+  const { user } = useAuth();
+  const [patronLevel, setPatronLevel] = useState<number>(0);
+  const [tooltipOpen, setTooltipOpen] = useState(false);
+
+  // Fetch the current user's patron_level from your users table
+  useEffect(() => {
+    // If you have a backend call to fetch patron level, do it here. For now, default to 0 for non-patrons.
+    setPatronLevel(0);
+  }, [user]);
 
   const triggerRefresh = () => {
     setRefreshKey((prevKey) => prevKey + 1);
@@ -146,6 +157,38 @@ const HomePage: React.FC = () => {
           />
           <SuggestedMovies refreshKey={suggestedMoviesRefreshKey} />
           <QueuedMovies refreshKey={refreshKey} />
+          {/* Hot Pocket Generator Button for patrons only, with tooltip for non-patrons */}
+          <div className="relative">
+            {patronLevel > 0 || user?.isAdmin ? (
+              <HotPocketGenerator />
+            ) : (
+              <div
+                onMouseEnter={() => setTooltipOpen(true)}
+                onMouseLeave={() => setTooltipOpen(false)}
+                className="inline-block"
+              >
+                <button
+                  className="relative h-10 px-3 xs:px-4 rounded-md border border-input bg-background shadow-sm cursor-not-allowed flex items-center justify-center"
+                  disabled
+                  style={{ pointerEvents: "auto" }}
+                  tabIndex={-1}
+                >
+                  <Image
+                    src="/hotpocket.png"
+                    alt="Hot Pocket"
+                    width={29}
+                    height={29}
+                    className="object-contain -my-1"
+                  />
+                </button>
+                {tooltipOpen && (
+                  <div className="absolute z-50 left-1/2 -translate-x-1/2 mt-2 px-4 py-2 bg-black text-white text-xs rounded shadow-lg whitespace-nowrap">
+                    Become a Patreon patron to gain access to our famous Hot Pocket Flave-O-Matic<sup>™</sup>!
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
           <Insights />
           <TopHundred />
         </div>
