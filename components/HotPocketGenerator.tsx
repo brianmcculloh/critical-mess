@@ -9,6 +9,8 @@ import { useTheme } from "next-themes";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { storeHotPocketCreation, getHotPocketComboCount, getTotalHotPocketCount } from "@/lib/hotPocketDb";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/lib/supabaseClient";
 
 const categories = [
   { key: "breakfast", label: "Breakfast" },
@@ -569,6 +571,9 @@ const ReelSystem = memo(function ReelSystem({
 
 const HotPocketGenerator: React.FC = () => {
   const { resolvedTheme } = useTheme();
+  const { user } = useAuth();
+  const [patronLevel, setPatronLevel] = useState<number>(0);
+  const [tooltipOpen, setTooltipOpen] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [showResult, setShowResult] = useState(false);
@@ -828,10 +833,26 @@ const HotPocketGenerator: React.FC = () => {
     );
   };
 
+  // Fetch the current user's patron_level from your users table
+  useEffect(() => {
+    const fetchPatronLevel = async () => {
+      const { data: { user: supaUser } } = await supabase.auth.getUser();
+      if (supaUser?.id) {
+        const { data, error } = await supabase
+          .from("users")
+          .select("patron_level")
+          .eq("id", supaUser.id)
+          .single();
+        if (!error && data) {
+          setPatronLevel(data.patron_level);
+        }
+      }
+    };
+    fetchPatronLevel();
+  }, []);
   // SSR/hydration-safe: only hide after first client render
   const [mounted, setMounted] = useState(false);
   useEffect(() => { setMounted(true); }, []);
-
   // Hide completely on 767px and below
   const [isHidden, setIsHidden] = useState(false);
   useEffect(() => {
@@ -840,115 +861,152 @@ const HotPocketGenerator: React.FC = () => {
     window.addEventListener('resize', checkHidden);
     return () => window.removeEventListener('resize', checkHidden);
   }, []);
-
+  // Tooltip click handler for non-patrons
+  const handleDisabledClick = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setTooltipOpen(true);
+  }, []);
+  // Close tooltip when clicking anywhere else
+  useEffect(() => {
+    const handleDocumentClick = () => {
+      if (tooltipOpen) setTooltipOpen(false);
+    };
+    document.addEventListener("click", handleDocumentClick);
+    return () => document.removeEventListener("click", handleDocumentClick);
+  }, [tooltipOpen]);
   if (!mounted || isHidden) return null;
+  // Patron gating logic
   return (
     <>
-      <Dialog
-        open={isDialogOpen || showResult}
-        onOpenChange={(open) => {
-          // Only allow closing if results modal is not open
-          if (!showResult) {
-            setIsDialogOpen(open);
-            // Reset to category view when dialog is closed
-            if (!open) {
-              setSelectedCategory(null);
-              setShowResult(false);
-            }
-          }
-        }}
-      >
-        <TooltipProvider delayDuration={0}>
-          <Tooltip>
+      <TooltipProvider delayDuration={0}>
+        {patronLevel > 0 || user?.isAdmin ? (
+          <Dialog
+            open={isDialogOpen || showResult}
+            onOpenChange={(open) => {
+              if (!showResult) {
+                setIsDialogOpen(open);
+                if (!open) {
+                  setSelectedCategory(null);
+                  setShowResult(false);
+                }
+              }
+            }}
+          >
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <DialogTrigger asChild>
+                  <Button variant="outline" className="relative h-10 px-3 xs:px-4">
+                    <Image 
+                      src={resolvedTheme === "light" ? "/hotpocket-lightmode.png" : "/hotpocket.png"}
+                      alt="Hot Pocket"
+                      width={29}
+                      height={29}
+                      className="object-contain -my-1"
+                    />
+                  </Button>
+                </DialogTrigger>
+              </TooltipTrigger>
+              <TooltipContent className="bg-black">
+                <span>Hot Pocket Flave-O-Matic<sup>™</sup> v1.0</span>
+              </TooltipContent>
+            </Tooltip>
+            <DialogContent
+              className="w-full max-h-[calc(100vh-40px)] rounded-2xl p-2 xs:p-8 pt-8 pb-8 xs:pt-8 xs:pb-16 text-center"
+              style={isCompact ? { width: '100vw', maxWidth: '100vw' } : { maxWidth: '1200px' }}
+            >
+              <DialogTitle className="text-center" style={{ fontSize: '2.25rem', lineHeight: '2.5rem', fontWeight: 700 }}>
+                Hot Pocket Flave-O-Matic<sup>™</sup> <span style={{ fontSize: '50%', opacity: 0.5, verticalAlign: 'middle' }}>v1.0</span>
+              </DialogTitle>
+              {!selectedCategory ? (
+                <div className="flex gap-5 mt-6 justify-center">
+                  {categories.map((cat) => (
+                    <Button
+                      key={cat.key}
+                      className={`h-[250px] rounded-xl p-6 flex flex-col items-center justify-center gap-4 transition-all duration-200 ${
+                        cat.key === 'breakfast' 
+                          ? 'bg-[#d5693f] text-white hover:bg-[#d5693f]/80' 
+                          : cat.key === 'dinner'
+                          ? 'bg-[#b92638] text-white hover:bg-[#b92638]/80'
+                          : 'bg-[#6a3253] text-white hover:bg-[#6a3253]/80'
+                      }`}
+                      style={{ width: isCompact ? 220 : 250 }}
+                      onClick={() => handleCategorySelect(cat.key)}
+                    >
+                      <div className="w-20 h-20 rounded-lg flex items-center justify-center overflow-hidden">
+                        {cat.key === 'breakfast' ? (
+                          <Image 
+                            src="/breakfast.png" 
+                            alt="Breakfast" 
+                            width={80} 
+                            height={80} 
+                            className="object-cover"
+                          />
+                        ) : cat.key === 'dinner' ? (
+                          <Image 
+                            src="/dinner.png" 
+                            alt="Dinner" 
+                            width={80} 
+                            height={80} 
+                            className="object-cover"
+                          />
+                        ) : cat.key === 'dessert' ? (
+                          <Image 
+                            src="/dessert.png" 
+                            alt="Dessert" 
+                            width={80} 
+                            height={80} 
+                            className="object-cover"
+                          />
+                        ) : (
+                          <span className="text-2xl">🍽️</span>
+                        )}
+                      </div>
+                      <span className="font-bold text-xl">{cat.label}</span>
+                    </Button>
+                  ))}
+                </div>
+              ) : (
+                <ReelSystem 
+                  categoryData={categoryData} 
+                  onBakeClick={handleBakeClick}
+                  onNext={handleNext}
+                  onBakeStart={handleBakeStart}
+                  resolvedTheme={resolvedTheme}
+                  isCompact={isCompact}
+                  lockTogglesDisabled={lockTogglesDisabled}
+                  locked={locked}
+                  setLocked={setLocked}
+                  categoryColor={getCategoryColor(selectedCategory)}
+                />
+              )}
+            </DialogContent>
+          </Dialog>
+        ) : (
+          <Tooltip open={tooltipOpen} onOpenChange={setTooltipOpen}>
             <TooltipTrigger asChild>
-              <DialogTrigger asChild>
-                <Button variant="outline" className="relative h-10 px-3 xs:px-4">
-                  <Image 
-                    src={resolvedTheme === "light" ? "/hotpocket-lightmode.png" : "/hotpocket.png"}
-                    alt="Hot Pocket"
-                    width={29}
-                    height={29}
-                    className="object-contain -my-1"
-                  />
-                </Button>
-              </DialogTrigger>
+              <button
+                className="relative h-10 px-3 xs:px-4 rounded-md border border-input bg-background shadow-sm cursor-not-allowed flex items-center justify-center"
+                disabled
+                style={{ pointerEvents: "auto" }}
+                tabIndex={-1}
+                onClick={handleDisabledClick}
+              >
+                <Image
+                  src="/hotpocket.png"
+                  alt="Hot Pocket"
+                  width={29}
+                  height={29}
+                  className="object-contain -my-1"
+                />
+              </button>
             </TooltipTrigger>
-            <TooltipContent className="bg-black">
-              <span>Hot Pocket Flave-O-Matic<sup>™</sup> v1.0</span>
+            <TooltipContent className="bg-black text-white text-xs rounded-lg px-3 py-2 shadow-lg whitespace-nowrap">
+              Become a Patreon patron to play with our famous Hot Pocket Flave-O-Matic<sup>™</sup>.
             </TooltipContent>
           </Tooltip>
-        </TooltipProvider>
-        <DialogContent
-          className="w-full max-h-[calc(100vh-40px)] rounded-2xl p-2 xs:p-8 pt-8 pb-8 xs:pt-8 xs:pb-16 text-center"
-          style={isCompact ? { width: '100vw', maxWidth: '100vw' } : { maxWidth: '1200px' }}
-        >
-          <DialogTitle className="text-center" style={{ fontSize: '2.25rem', lineHeight: '2.5rem', fontWeight: 700 }}>
-            Hot Pocket Flave-O-Matic<sup>™</sup> <span style={{ fontSize: '50%', opacity: 0.5, verticalAlign: 'middle' }}>v1.0</span>
-          </DialogTitle>
-          {!selectedCategory ? (
-            <div className="flex gap-5 mt-6 justify-center">
-              {categories.map((cat) => (
-                <Button
-                  key={cat.key}
-                  className={`h-[250px] rounded-xl p-6 flex flex-col items-center justify-center gap-4 transition-all duration-200 ${
-                    cat.key === 'breakfast' 
-                      ? 'bg-[#d5693f] text-white hover:bg-[#d5693f]/80' 
-                      : cat.key === 'dinner'
-                      ? 'bg-[#b92638] text-white hover:bg-[#b92638]/80'
-                      : 'bg-[#6a3253] text-white hover:bg-[#6a3253]/80'
-                  }`}
-                  style={{ width: isCompact ? 220 : 250 }}
-                  onClick={() => handleCategorySelect(cat.key)}
-                >
-                  <div className="w-20 h-20 rounded-lg flex items-center justify-center overflow-hidden">
-                    {cat.key === 'breakfast' ? (
-                      <Image 
-                        src="/breakfast.png" 
-                        alt="Breakfast" 
-                        width={80} 
-                        height={80} 
-                        className="object-cover"
-                      />
-                    ) : cat.key === 'dinner' ? (
-                      <Image 
-                        src="/dinner.png" 
-                        alt="Dinner" 
-                        width={80} 
-                        height={80} 
-                        className="object-cover"
-                      />
-                    ) : cat.key === 'dessert' ? (
-                      <Image 
-                        src="/dessert.png" 
-                        alt="Dessert" 
-                        width={80} 
-                        height={80} 
-                        className="object-cover"
-                      />
-                    ) : (
-                      <span className="text-2xl">🍽️</span>
-                    )}
-                  </div>
-                  <span className="font-bold text-xl">{cat.label}</span>
-                </Button>
-              ))}
-            </div>
-          ) : (
-            <ReelSystem 
-              categoryData={categoryData} 
-              onBakeClick={handleBakeClick}
-              onNext={handleNext}
-              onBakeStart={handleBakeStart}
-              resolvedTheme={resolvedTheme}
-              isCompact={isCompact}
-              lockTogglesDisabled={lockTogglesDisabled}
-              locked={locked}
-              setLocked={setLocked}
-              categoryColor={getCategoryColor(selectedCategory)}
-            />
-          )}
-        </DialogContent>
-      </Dialog>
+        )}
+      </TooltipProvider>
       <ResultsModal />
     </>
   );
