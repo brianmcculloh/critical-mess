@@ -912,7 +912,7 @@ const HotPocketGenerator: React.FC = () => {
               </TooltipContent>
             </Tooltip>
             <DialogContent
-              className="w-full max-h-[calc(100vh-40px)] rounded-2xl p-2 xs:p-8 pt-8 pb-8 xs:pt-8 xs:pb-16 text-center"
+              className="w-full max-h-[100vh] overflow-y-auto rounded-2xl p-2 xs:p-8 pt-8 pb-8 xs:pt-8 xs:pb-16 text-center"
               style={isCompact ? { width: '100vw', maxWidth: '100vw' } : { maxWidth: '1200px' }}
             >
               <DialogTitle className="text-center" style={{ fontSize: '2.25rem', lineHeight: '2.5rem', fontWeight: 700 }}>
