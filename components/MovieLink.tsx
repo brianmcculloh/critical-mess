@@ -154,9 +154,16 @@ const MovieLink: React.FC<MovieLinkProps> = ({ movie, isAdmin, onUrlUpdate, show
           className="relative group"
         >
           {imageContent}
+          {/* Always visible play button */}
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="w-12 h-12 bg-white bg-opacity-90 rounded-full flex items-center justify-center shadow-lg">
+              <div className="w-0 h-0 border-l-[16px] border-l-black border-t-[10px] border-t-transparent border-b-[10px] border-b-transparent ml-1"></div>
+            </div>
+          </div>
+          {/* Hover overlay with text */}
           <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition bg-black bg-opacity-50">
             <span className="text-white font-bold flex items-center gap-2">
-              <span>Watch episode</span>
+              <span>Watch on YouTube</span>
               <Video className="w-5 h-5" />
             </span>
           </div>

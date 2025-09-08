@@ -172,11 +172,11 @@ const MovieCard: React.FC<MovieCardProps> = ({
   };
 
   return (
-    <div className="relative p-4 border text-card-foreground rounded-lg shadow bg-card">
+    <div className="relative p-4 border text-card-foreground rounded-lg shadow bg-card w-full max-w-full">
       <h3 className={`mb-3 flex items-center ${isAdmin ? "pr-7" : ""}`}>
         {movie.title.trim().length > 26 ? (
-          <div className="flex-1 overflow-hidden">
-            <div className="inline-flex whitespace-nowrap animate-marquee">
+          <div className="flex-1 overflow-hidden max-w-full">
+            <div className="inline-flex whitespace-nowrap animate-marquee max-w-full">
               {/* First copy of the title plus gap */}
               <div className="flex-shrink-0 inline-flex items-center">
                 <span className="text-2xl font-light">{movie.title.trim()}</span>

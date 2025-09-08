@@ -35,7 +35,7 @@ interface TutorialProps {
   onClose: () => void;
 }
 
-type ArrowDirection = "top" | "bottom";
+type ArrowDirection = "top" | "bottom" | "left" | "right";
 
 // Define a type for each speech bubble in lock mode.
 interface BubbleData {
@@ -48,6 +48,8 @@ interface BubbleData {
 const Tutorial: React.FC<TutorialProps> = ({ onClose }) => {
   // Add mobile detection state
   const [isMobile, setIsMobile] = useState(false);
+  // Add small viewport detection for tutorial positioning
+  const [isSmallViewport, setIsSmallViewport] = useState(false);
 
   // Track if the tutorial has been shown before
   const [hasSeenTutorial, setHasSeenTutorial] = useState<boolean>(false);
@@ -57,9 +59,17 @@ const Tutorial: React.FC<TutorialProps> = ({ onClose }) => {
     const checkMobile = () => {
       setIsMobile(window.innerWidth <= 1180 - 1);
     };
+    const checkSmallViewport = () => {
+      setIsSmallViewport(window.innerWidth <= 1248);
+    };
     checkMobile();
+    checkSmallViewport();
     window.addEventListener("resize", checkMobile);
-    return () => window.removeEventListener("resize", checkMobile);
+    window.addEventListener("resize", checkSmallViewport);
+    return () => {
+      window.removeEventListener("resize", checkMobile);
+      window.removeEventListener("resize", checkSmallViewport);
+    };
   }, []);
 
   // Check localStorage for tutorial flag on mount
@@ -136,6 +146,36 @@ const Tutorial: React.FC<TutorialProps> = ({ onClose }) => {
             const targetElement = document.getElementById(bubble.targetId);
             if (targetElement) {
               const rect = targetElement.getBoundingClientRect();
+              
+              // Handle small viewport positioning (≤ 1248px)
+              if (isSmallViewport) {
+                // For "movie-search-local" (search input), position above
+                if (bubble.targetId === "movie-search-local") {
+                  return {
+                    ...bubble,
+                    position: { top: rect.top - 70, left: rect.left + rect.width / 2 },
+                    arrowDirection: "bottom", // arrow points downward since bubble is above
+                  };
+                }
+                // For "add-movie" (suggest button), position to the right to avoid cutoff
+                if (bubble.targetId === "add-movie") {
+                  return {
+                    ...bubble,
+                    position: { top: (rect.top + rect.height / 2) - 22, left: rect.right + 185 },
+                    arrowDirection: "left", // arrow points left since bubble is to the right
+                  };
+                }
+                // For "#sorting", display the bubble above the element.
+                if (bubble.targetId === "sorting") {
+                  return {
+                    ...bubble,
+                    position: { top: rect.top - 70, left: rect.left + rect.width / 2 },
+                    arrowDirection: "bottom", // arrow points downward since bubble is above
+                  };
+                }
+              }
+              
+              // Default behavior for larger viewports
               // For "#sorting", display the bubble above the element.
               if (bubble.targetId === "sorting") {
                 return {
@@ -156,7 +196,7 @@ const Tutorial: React.FC<TutorialProps> = ({ onClose }) => {
         );
       }, 100);
     }
-  }, [tutorialStep]);
+  }, [tutorialStep, isSmallViewport]);
 
   return (isMobile || hasSeenTutorial) ? null : (
     <>

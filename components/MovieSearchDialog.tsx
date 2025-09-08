@@ -305,48 +305,46 @@ const MovieSearchDialog: React.FC<MovieSearchDialogProps> = ({
               ? "Add a new movie directly to the official Critical Mess list."
               : "Did you find a critical mess out in the wild? Add it to our legendary list!"}
           </DialogDescription>
-          <div className="p-0 xs:p-4">
-            <MovieSearch
-              onSelectMovie={handleMovieSelection}
-              fetchMovies={fetchMovies}
-              isAdmin={isAdmin}
-            />
-            {selectedMovie && (
-              <div className="mt-4 relative">
-                <MovieCard
-                  movie={{
-                    ...selectedMovie,
-                    suggestion_count: selectedMovie?.suggestion_count ?? 0,
-                    status: selectedMovie.status ?? "",
-                  }}
-                  editable={false}
-                  showRTRatings={false}
-                  showHostRatings={false}
-                  showUserRatings={false} 
-                  showDelete={false}
-                  showEpisode={fromTopHundred ? false : true}
-                  showMovieLink={fromTopHundred ? false : true}
-                  skipEpisodeDatabaseSave={true}
-                  onEpisodeChange={setStagedEpisode}
-                  onStartEpisodeEdit={() => setIsEditingEpisode(true)}
-                  onStopEpisodeEdit={() => setIsEditingEpisode(false)}
-                />
-                <Button 
-                  onClick={handleAddMovie} 
-                  className="mt-4 transition text-black" 
-                  disabled={isEditingEpisode || addingMovie}
-                >
-                  {fromTopHundred 
-                    ? "Add To List" 
-                    : isAdmin 
-                      ? (addingMovie ? "Loading..." : "Add This Movie") 
-                      : (addingMovie ? "Loading..." : "Suggest This")
-                  }
-                  <Check className="transform w-5 h-5" />
-                </Button>
-              </div>
-            )}
-          </div>
+          <MovieSearch
+            onSelectMovie={handleMovieSelection}
+            fetchMovies={fetchMovies}
+            isAdmin={isAdmin}
+          />
+          {selectedMovie && (
+            <div className="relative max-w-md">
+              <MovieCard
+                movie={{
+                  ...selectedMovie,
+                  suggestion_count: selectedMovie?.suggestion_count ?? 0,
+                  status: selectedMovie.status ?? "",
+                }}
+                editable={false}
+                showRTRatings={false}
+                showHostRatings={false}
+                showUserRatings={false} 
+                showDelete={false}
+                showEpisode={fromTopHundred ? false : true}
+                showMovieLink={fromTopHundred ? false : true}
+                skipEpisodeDatabaseSave={true}
+                onEpisodeChange={setStagedEpisode}
+                onStartEpisodeEdit={() => setIsEditingEpisode(true)}
+                onStopEpisodeEdit={() => setIsEditingEpisode(false)}
+              />
+              <Button 
+                onClick={handleAddMovie} 
+                className="mt-4 transition text-black" 
+                disabled={isEditingEpisode || addingMovie}
+              >
+                {fromTopHundred 
+                  ? "Add To List" 
+                  : isAdmin 
+                    ? (addingMovie ? "Loading..." : "Add This Movie") 
+                    : (addingMovie ? "Loading..." : "Suggest This")
+                }
+                <Check className="transform w-5 h-5" />
+              </Button>
+            </div>
+          )}
         </DialogContent>
       </Dialog>
     </>

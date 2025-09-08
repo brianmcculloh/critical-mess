@@ -160,7 +160,7 @@ const QueuedMovies: React.FC<{ refreshKey: number }> = ({ refreshKey }) => {
           <DialogDescription>
             These are movies waiting for their turn. Upvote your favorites! (List is in alphabetical order. Future episode order has not been determined.)
           </DialogDescription>
-          <div className="grid custom-grid gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {movies.map((movie) => (
               <MovieCard
                 key={movie.id}
