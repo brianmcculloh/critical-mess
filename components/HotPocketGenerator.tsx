@@ -41,6 +41,7 @@ function weightedRandom<T extends { weight: number }>(items: T[]): number {
 const seasoningStyles = [
   { label: "dusted", weight: 100 },
   { label: "seasoned", weight: 80 },
+  { label: "double-dusted", weight: 20 },
   { label: "blasted", weight: 20 },
 ];
 
@@ -908,16 +909,44 @@ const HotPocketGenerator: React.FC = () => {
                 </DialogTrigger>
               </TooltipTrigger>
               <TooltipContent className="bg-black">
-                <span>Hot Pocket Flave-O-Matic<sup>™</sup> v1.0</span>
+                <span>Hot Pocket Flave-O-Matic<sup>™</sup> v1.1</span>
               </TooltipContent>
             </Tooltip>
             <DialogContent
               className="w-full max-h-[100vh] overflow-y-auto rounded-2xl p-2 xs:p-8 pt-8 pb-8 xs:pt-8 xs:pb-16 text-center"
               style={isCompact ? { width: '100vw', maxWidth: '100vw' } : { maxWidth: '1200px' }}
             >
-              <DialogTitle className="text-center" style={{ fontSize: '2.25rem', lineHeight: '2.5rem', fontWeight: 700 }}>
-                Hot Pocket Flave-O-Matic<sup>™</sup> <span style={{ fontSize: '50%', opacity: 0.5, verticalAlign: 'middle' }}>v1.0</span>
+              <style>{`
+                @keyframes pulse-grow {
+                  0%, 100% {
+                    transform: rotate(30deg) scale(1);
+                  }
+                  50% {
+                    transform: rotate(30deg) scale(1.15);
+                  }
+                }
+              `}</style>
+              <DialogTitle className="text-center relative inline-block" style={{ fontSize: '2.25rem', lineHeight: '2.5rem', fontWeight: 700 }}>
+                Hot Pocket Flave-O-Matic<sup>™</sup> <span style={{ fontSize: '50%', opacity: 0.5, verticalAlign: 'middle' }}>v1.1</span>
               </DialogTitle>
+              <span 
+                style={{ 
+                  position: 'absolute',
+                  left: '50%',
+                  top: '17px',
+                  marginLeft: isCompact ? '110px' : '250px',
+                  color: '#ebb433',
+                  fontSize: '1rem',
+                  fontWeight: 600,
+                  whiteSpace: 'nowrap',
+                  animation: 'pulse-grow 2s ease-in-out infinite',
+                  pointerEvents: 'none',
+                  textAlign: 'center',
+                  lineHeight: '1.2'
+                }}
+              >
+                now<br />coconut-free!
+              </span>
               {!selectedCategory ? (
                 <div className="flex gap-5 mt-6 justify-center">
                   {categories.map((cat) => (
