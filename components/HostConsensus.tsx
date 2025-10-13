@@ -35,9 +35,9 @@ const HostConsensus: React.FC<HostConsensusProps> = ({ showLowest = true }) => {
     return null;
   };
 
-  const { theme } = useTheme();
-  const isDarkMode = theme === "dark";
-  const axisColor = isDarkMode ? "#BBB" : "#333";
+  const { resolvedTheme } = useTheme();
+  const isDarkMode = resolvedTheme === "dark";
+  const axisColor = isDarkMode ? "rgb(242, 242, 242)" : "#333";
 
   // State to store our processed data.
   const [movieData, setMovieData] = useState<
@@ -105,7 +105,7 @@ const HostConsensus: React.FC<HostConsensusProps> = ({ showLowest = true }) => {
         ) : (
           <ResponsiveContainer width="100%" height={350}>
             <BarChart data={movieData} layout="vertical">
-              <CartesianGrid strokeDasharray="3 3" stroke={isDarkMode ? "#333" : "#CCC"} />
+              <CartesianGrid strokeDasharray="3 3" stroke={isDarkMode ? "#333333" : "#CCC"} />
               {/* Set the minimum to 0 and maximum remains auto */}
               <XAxis type="number" tick={{ fill: axisColor }} domain={[0, "auto"]} />
               <YAxis

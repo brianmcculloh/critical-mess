@@ -35,9 +35,9 @@ const TopTen: React.FC<TopTenProps> = ({ host, showLowest = false }) => {
     return null;
   };
 
-  const { theme } = useTheme();
-  const isDarkMode = theme === "dark";
-  const axisColor = isDarkMode ? "#BBB" : "#333";
+  const { resolvedTheme } = useTheme();
+  const isDarkMode = resolvedTheme === "dark";
+  const axisColor = isDarkMode ? "rgb(242, 242, 242)" : "#333";
 
   const [movieData, setMovieData] = useState<{ title: string; rating: number }[]>([]);
   const [loading, setLoading] = useState(true);
@@ -93,7 +93,7 @@ const TopTen: React.FC<TopTenProps> = ({ host, showLowest = false }) => {
         ) : (
           <ResponsiveContainer width="100%" height={350}>
             <BarChart data={movieData} layout="vertical">
-              <CartesianGrid strokeDasharray="3 3" stroke={isDarkMode ? "#333" : "#CCC"} />
+              <CartesianGrid strokeDasharray="3 3" stroke={isDarkMode ? "#333333" : "#CCC"} />
               <XAxis type="number" tick={{ fill: axisColor }} domain={[0, 100]} />
               <YAxis type="category" dataKey="title" tick={{ fill: axisColor, fontSize: "13px" }} width={150} />
               <Tooltip content={<CustomTooltip />} cursor={{ fill: isDarkMode ? "rgba(255, 255, 255, 0.05)" : "rgba(0, 0, 0, 0.05)" }} />

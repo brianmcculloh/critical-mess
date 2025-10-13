@@ -24,9 +24,9 @@ interface HostOutlierData {
 }
 
 const HostOutlier: React.FC = () => {
-  const { theme } = useTheme();
-  const isDarkMode = theme === "dark";
-  const axisColor = isDarkMode ? "#BBB" : "#333";
+  const { resolvedTheme } = useTheme();
+  const isDarkMode = resolvedTheme === "dark";
+  const axisColor = isDarkMode ? "rgb(242, 242, 242)" : "#333";
 
   const [movieData, setMovieData] = useState<HostOutlierData[]>([]);
   const [loading, setLoading] = useState(true);
@@ -98,7 +98,7 @@ const HostOutlier: React.FC = () => {
         ) : (
           <ResponsiveContainer width="100%" height={350}>
             <BarChart data={movieData} layout="vertical">
-              <CartesianGrid strokeDasharray="3 3" stroke={isDarkMode ? "#333" : "#CCC"} />
+              <CartesianGrid strokeDasharray="3 3" stroke={isDarkMode ? "#333333" : "#CCC"} />
               <XAxis type="number" tick={{ fill: axisColor }} domain={["auto", "auto"]} />
               <YAxis
                 type="category"

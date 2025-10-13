@@ -47,9 +47,9 @@ const CustomTooltip: React.FC<CustomTooltipProps> = ({ active, payload }) => {
 };
 
 const HostComparison: React.FC<HostComparisonProps> = ({ title, description, data, isDisparity = false, icon, relativeYAxis = false }) => {
-  const { theme } = useTheme();
-  const isDarkMode = theme === "dark";
-  const axisColor = isDarkMode ? "#BBB" : "#333";
+  const { resolvedTheme } = useTheme();
+  const isDarkMode = resolvedTheme === "dark";
+  const axisColor = isDarkMode ? "rgb(242, 242, 242)" : "#333";
 
   // Find the highest absolute disparity value for dynamic domain scaling
   const maxDisparity = Math.ceil(Math.max(...data.map(item => Math.abs(item.value)), 10) / 10) * 10;
@@ -83,7 +83,7 @@ const HostComparison: React.FC<HostComparisonProps> = ({ title, description, dat
       <CardContent>
         <ResponsiveContainer width="100%" height={300}>
           <BarChart data={processedData}>
-            <CartesianGrid strokeDasharray="3 3" stroke={isDarkMode ? "#333" : "#CCC"} />
+            <CartesianGrid strokeDasharray="3 3" stroke={isDarkMode ? "#333333" : "#CCC"} />
             <XAxis dataKey="host_name" tickFormatter={(name) => name.toUpperCase()} tick={{ fill: axisColor }} />
             <YAxis domain={isDisparity ? [-maxDisparity, maxDisparity] : [0, maxYAxis]} tick={{ fill: axisColor }} />
             <Tooltip content={<CustomTooltip />} cursor={{ fill: isDarkMode ? "rgba(255, 255, 255, 0.05)" : "rgba(0, 0, 0, 0.05)" }} />

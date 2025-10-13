@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label";
 import { storeHotPocketCreation, getHotPocketComboCount, getTotalHotPocketCount } from "@/lib/hotPocketDb";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/lib/supabaseClient";
+import { PATRON_PAYWALL_ENABLED } from "@/lib/featureFlags";
 
 const categories = [
   { key: "breakfast", label: "Breakfast" },
@@ -877,11 +878,12 @@ const HotPocketGenerator: React.FC = () => {
     return () => document.removeEventListener("click", handleDocumentClick);
   }, [tooltipOpen]);
   if (!mounted || isHidden) return null;
-  // Patron gating logic
+  // Patron gating logic - controlled by global feature flag
+  const hasAccess = !PATRON_PAYWALL_ENABLED || patronLevel > 0 || user?.isAdmin;
   return (
     <>
       <TooltipProvider delayDuration={0}>
-        {patronLevel > 0 || user?.isAdmin ? (
+        {hasAccess ? (
           <Dialog
             open={isDialogOpen || showResult}
             onOpenChange={(open) => {

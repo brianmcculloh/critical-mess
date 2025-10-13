@@ -29,9 +29,9 @@ const MovieDisparity: React.FC = () => {
     return null;
   };
 
-  const { theme } = useTheme();
-  const isDarkMode = theme === "dark";
-  const axisColor = isDarkMode ? "#BBB" : "#333";
+  const { resolvedTheme } = useTheme();
+  const isDarkMode = resolvedTheme === "dark";
+  const axisColor = isDarkMode ? "rgb(242, 242, 242)" : "#333";
 
   const [movieData, setMovieData] = useState<
     { title: string; gap: number }[]
@@ -94,7 +94,7 @@ const MovieDisparity: React.FC = () => {
               <BarChart data={movieData} layout="vertical">
                 <CartesianGrid
                   strokeDasharray="3 3"
-                  stroke={isDarkMode ? "#333" : "#CCC"}
+                  stroke={isDarkMode ? "#333333" : "#CCC"}
                 />
                 <XAxis type="number" tick={{ fill: axisColor }} />
                 <YAxis

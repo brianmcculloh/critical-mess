@@ -204,15 +204,13 @@ const Tutorial: React.FC<TutorialProps> = ({ onClose }) => {
         <Dialog
           open
           onOpenChange={(open) => {
-            // Prevent closing on outside clicks.
             if (!open) {
-              // Do nothing.
+              setTutorialStep("lock");
             }
           }}
         >
           <DialogContent
             className="max-h-screen fixed max-w-[440px] w-full"
-            onPointerDownOutside={(e) => e.preventDefault()}
           >
             <DialogHeader>
               <DialogTitle className="text-2xl font-bold">
@@ -266,7 +264,6 @@ const Tutorial: React.FC<TutorialProps> = ({ onClose }) => {
               <p>Loading example movie...</p>
             )}
             <div className="mt-2 flex justify-end absolute bottom-[5px] right-[10px]">
-              {/* Transition to lock mode */}
               <Button
                 onClick={() => setTutorialStep("lock")}
                 className="text-lg font-bold text-black focus:outline-none focus:ring-0"

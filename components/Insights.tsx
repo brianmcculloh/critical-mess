@@ -9,6 +9,7 @@ import MovieDisparity from "@/components/MovieDisparity";
 import TopTen from "@/components/TopTen";
 import HostConsensus from "@/components/HostConsensus";
 import HostOutlier from "@/components/HostOutlier";
+import { PATRON_PAYWALL_ENABLED } from "@/lib/featureFlags";
 import {
   Dialog,
   DialogTrigger,
@@ -116,10 +117,13 @@ const InsightsPage: React.FC = () => {
     };
   }, [tooltipOpen]);
 
+  // Patron gating logic - controlled by global feature flag
+  const hasAccess = !PATRON_PAYWALL_ENABLED || patronLevel > 0 || user?.isAdmin;
+
   return (
     <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
       <TooltipProvider delayDuration={0}>
-        {patronLevel > 0 || user?.isAdmin ? (
+        {hasAccess ? (
           // For patrons: wrap the button in a DialogTrigger so it opens the dialog.
           <DialogTrigger asChild>
             <Button className="transition-colors bg-secondary hover:bg-secondary/70 text-black dark:text-white">

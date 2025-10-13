@@ -7,6 +7,7 @@ import { Trash2, Rocket } from "lucide-react";
 import { supabase } from "@/lib/supabaseClient";
 import MovieSearchDialog from "@/components/MovieSearchDialog";
 import { DragDropContext, Droppable, Draggable, DropResult } from "@hello-pangea/dnd";
+import { PATRON_PAYWALL_ENABLED } from "@/lib/featureFlags";
 import {
   Dialog,
   DialogTrigger,
@@ -241,10 +242,13 @@ const TopHundred: React.FC = () => {
     };
   }, [tooltipOpen]);
 
+  // Patron gating logic - controlled by global feature flag
+  const hasAccess = !PATRON_PAYWALL_ENABLED || patronLevel > 0 || user?.isAdmin;
+
   return (
     <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
       <TooltipProvider delayDuration={0}>
-        {patronLevel > 0 || user?.isAdmin ? (
+        {hasAccess ? (
           <DialogTrigger asChild>
             <Button className="transition-colors bg-secondary hover:bg-secondary/70 text-black dark:text-white">
               <span className="hidden xs:block">Top 100</span>
