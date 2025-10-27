@@ -107,7 +107,7 @@ const MovieLink: React.FC<MovieLinkProps> = ({ movie, isAdmin, onUrlUpdate, show
             </>
           ) : (
             showMovieLink && (
-              <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition bg-black bg-opacity-50 cursor-pointer">
+              <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition bg-black bg-opacity-50 cursor-pointer pointer-events-none md:block hidden">
                 <span className="text-white font-bold">Click to edit link</span>
               </div>
             )
@@ -147,27 +147,29 @@ const MovieLink: React.FC<MovieLinkProps> = ({ movie, isAdmin, onUrlUpdate, show
 
     if (movie.url && showMovieLink) {
       return (
-        <a
-          href={movie.url}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="relative group"
-        >
-          {imageContent}
-          {/* Always visible play button */}
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="w-12 h-12 bg-white bg-opacity-90 rounded-full flex items-center justify-center shadow-lg">
-              <div className="w-0 h-0 border-l-[16px] border-l-black border-t-[10px] border-t-transparent border-b-[10px] border-b-transparent ml-1"></div>
+        <div className="relative">
+          <a
+            href={movie.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="relative group block"
+          >
+            {imageContent}
+            {/* Always visible play button */}
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+              <div className="w-12 h-12 bg-white bg-opacity-90 rounded-full flex items-center justify-center shadow-lg relative">
+                <div className="w-0 h-0 border-l-[16px] border-l-black border-t-[10px] border-t-transparent border-b-[10px] border-b-transparent translate-x-0.5"></div>
+              </div>
             </div>
-          </div>
-          {/* Hover overlay with text */}
-          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition bg-black bg-opacity-50">
-            <span className="text-white font-bold flex items-center gap-2">
-              <span>Watch on YouTube</span>
-              <Video className="w-5 h-5" />
-            </span>
-          </div>
-        </a>
+            {/* Hover overlay with text - hidden on touch devices */}
+            <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition bg-black bg-opacity-50 pointer-events-none hidden md:flex">
+              <span className="text-white font-bold flex items-center gap-2">
+                <span>Watch on YouTube</span>
+                <Video className="w-5 h-5" />
+              </span>
+            </div>
+          </a>
+        </div>
       );
     } else {
       // If showMovieLink is false or there's no URL, render the image without interaction.
