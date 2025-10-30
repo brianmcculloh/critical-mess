@@ -122,6 +122,7 @@ const ReelSystem = memo(function ReelSystem({
   onBakeStart,
   resolvedTheme,
   isCompact,
+  isMobile,
   lockTogglesDisabled,
   locked,
   setLocked,
@@ -133,6 +134,7 @@ const ReelSystem = memo(function ReelSystem({
   onBakeStart: () => void;
   resolvedTheme: string | undefined;
   isCompact: boolean;
+  isMobile: boolean;
   lockTogglesDisabled: boolean;
   locked: boolean[];
   setLocked: React.Dispatch<React.SetStateAction<boolean[]>>;
@@ -188,7 +190,7 @@ const ReelSystem = memo(function ReelSystem({
   }, [categoryData]);
 
   // Memoized Reel component
-  const Reel = memo(function Reel({ items, selectedIdx, greyed, bandName, reelIndex, resolvedTheme, isCompact, locked, categoryColor }: { 
+  const Reel = memo(function Reel({ items, selectedIdx, greyed, bandName, reelIndex, resolvedTheme, isCompact, isHorizontal, locked, categoryColor }: { 
     items: HitIngredient[];
     selectedIdx: number; 
     greyed: boolean; 
@@ -196,6 +198,7 @@ const ReelSystem = memo(function ReelSystem({
     reelIndex: number;
     resolvedTheme: string | undefined;
     isCompact: boolean;
+    isHorizontal: boolean;
     locked: boolean;
     categoryColor?: string;
   }) {
@@ -211,29 +214,42 @@ const ReelSystem = memo(function ReelSystem({
     }
     const isLightMode = resolvedTheme === "light";
     const outerBorderWidthLocal = isCompact ? 2 : 4;
-    const itemWidth = isCompact ? 140 : 200;
-    const itemHeight = isCompact ? 140 : 200;
-    const outerReelHeight = isCompact ? 420 : 535;
-    const itemFont = isCompact ? { fontSize: '.8rem', lineHeight: '1.2rem' } : {};
+    const itemWidth = isHorizontal ? 80 : (isCompact ? 140 : 200);
+    const itemHeight = isHorizontal ? 80 : (isCompact ? 140 : 200);
+    const outerReelHeight = isHorizontal ? itemHeight : (isCompact ? 420 : 535);
+    const itemFont = isHorizontal
+      ? { fontSize: '.575rem', lineHeight: '.625rem' }
+      : (isCompact ? { fontSize: '.8rem', lineHeight: '1.2rem' } : {});
     return (
       <div
-        className={`relative flex items-center justify-center rounded-xl ${isLightMode ? 'bg-white' : 'bg-black'} w-56 min-w-56 max-w-56`}
+        className={`relative flex items-center justify-center rounded-xl ${isLightMode ? 'bg-white' : 'bg-black'} ${isHorizontal ? 'w-full' : 'w-56 min-w-56 max-w-56'}`}
         style={{
           height: outerReelHeight,
           border: `${outerBorderWidthLocal}px solid ${borderColor}`,
-          ...(isCompact ? { width: 172, minWidth: 172, maxWidth: 172 } : {}),
+          ...(isHorizontal ? {} : (isCompact ? { width: 172, minWidth: 172, maxWidth: 172 } : {})),
         }}
       >
+        {/* edge gradients */}
+        {!isHorizontal && (
+          <>
         <div className="pointer-events-none absolute top-0 left-0 w-full z-20 rounded-t-[10px]" style={{height: '75px', background: isLightMode ? 'linear-gradient(to bottom, rgba(255,255,255,1) 0%, rgba(255,255,255,0) 100%)' : 'linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 100%)'}} />
         <div className="pointer-events-none absolute bottom-0 left-0 w-full z-20 rounded-b-[10px]" style={{height: '75px', background: isLightMode ? 'linear-gradient(to top, rgba(255,255,255,1) 0%, rgba(255,255,255,0) 100%)' : 'linear-gradient(to top, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 100%)'}} />
+          </>
+        )}
+        {isHorizontal && (
+          <>
+            <div className="pointer-events-none absolute left-0 top-0 h-full z-20 rounded-l-[10px]" style={{width: '30px', background: isLightMode ? 'linear-gradient(to right, rgba(255,255,255,1) 0%, rgba(255,255,255,0) 100%)' : 'linear-gradient(to right, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 100%)'}} />
+            <div className="pointer-events-none absolute right-0 top-0 h-full z-20 rounded-r-[10px]" style={{width: '30px', background: isLightMode ? 'linear-gradient(to left, rgba(255,255,255,1) 0%, rgba(255,255,255,0) 100%)' : 'linear-gradient(to left, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 100%)'}} />
+          </>
+        )}
         <div 
           ref={(el) => { 
             reelRefs.current[reelIndex] = el; 
 
           }}
-          className="relative z-10 w-full h-full overflow-hidden rounded-[10px]"
+          className={`relative z-10 w-full h-full overflow-hidden rounded-[10px] ${isHorizontal ? 'overflow-x-hidden' : ''}`}
         >
-          <div className="w-full">
+          <div className={`${isHorizontal ? 'flex flex-row' : 'w-full'}`}>
             {items.map((item, idx) => {
               let backgroundColor = isLightMode ? 'white' : 'black';
               if (bandName === 'Base' && categoryColor) {
@@ -256,22 +272,21 @@ const ReelSystem = memo(function ReelSystem({
               return (
                 <div
                   key={`${item.name}-${idx}`}
-                  className={`flex flex-col items-center justify-center w-full border-b-[3px] border-dashed px-5 text-center p-[15px]`}
+                  className={`flex flex-col items-center justify-center ${isHorizontal ? '' : 'w-full'} border-dashed text-center`}
                   style={{
                     minHeight: itemHeight,
                     maxHeight: itemHeight,
                     height: itemHeight,
                     backgroundColor,
-                    // For light mode, use black with 20% transparency; for dark mode, keep as is
                     borderColor:
                       isLightMode
                         ? 'rgba(0,0,0,0.2)'
                         : 'rgba(255,255,255,0.305)',
                     borderStyle: 'dashed',
-                    borderWidth: '0 0 2px 0',
+                    ...(isHorizontal ? { borderWidth: '0 2px 0 0', minWidth: itemWidth, width: itemWidth, maxWidth: itemWidth, padding: '4px 6px' } : { borderWidth: '0 0 2px 0', padding: '12px 16px' })
                   }}
                 >
-                  <div className="w-16 h-16 rounded mb-2 flex items-center justify-center mx-auto">
+                  <div className="rounded mb-1 flex items-center justify-center mx-auto" style={{ width: isHorizontal ? 32 : 64, height: isHorizontal ? 32 : 64 }}>
                     {(() => {
                       let isDimmed = !item.isHit;
                       if (item.isHit) {
@@ -290,8 +305,8 @@ const ReelSystem = memo(function ReelSystem({
                           <Image 
                             src={isLightMode ? "/hotpocket-lightmode.png" : "/hotpocket.png"}
                             alt="Base" 
-                            width={64} 
-                            height={64} 
+                            width={isHorizontal ? 32 : 64} 
+                            height={isHorizontal ? 32 : 64} 
                             className={`object-contain ${opacityClass}`}
                           />
                         );
@@ -300,8 +315,8 @@ const ReelSystem = memo(function ReelSystem({
                           <Image 
                             src={isLightMode ? "/modifier-lightmode.png" : "/modifier.png"}
                             alt="Modifier" 
-                            width={64} 
-                            height={64} 
+                            width={isHorizontal ? 32 : 64} 
+                            height={isHorizontal ? 32 : 64} 
                             className={`object-contain ${opacityClass}`}
                           />
                         );
@@ -310,8 +325,8 @@ const ReelSystem = memo(function ReelSystem({
                           <Image 
                             src={isLightMode ? "/crust-lightmode.png" : "/crust.png"}
                             alt="Crust" 
-                            width={64} 
-                            height={64} 
+                            width={isHorizontal ? 32 : 64} 
+                            height={isHorizontal ? 32 : 64} 
                             className={`object-contain ${opacityClass}`}
                           />
                         );
@@ -320,8 +335,8 @@ const ReelSystem = memo(function ReelSystem({
                           <Image 
                             src={isLightMode ? "/seasoning-lightmode.png" : "/seasoning.png"}
                             alt="Seasoning" 
-                            width={64} 
-                            height={64} 
+                            width={isHorizontal ? 32 : 64} 
+                            height={isHorizontal ? 32 : 64} 
                             className={`object-contain ${opacityClass}`}
                           />
                         );
@@ -400,12 +415,16 @@ const ReelSystem = memo(function ReelSystem({
       const easeOutCubic = 1 - Math.pow(1 - progress, 3);
       reelRefs.current.forEach((reelRef, index) => {
         if (reelRef) {
-          const maxScroll = reelRef.scrollHeight - reelRef.clientHeight;
+          const maxScroll = isMobile ? (reelRef.scrollWidth - reelRef.clientWidth) : (reelRef.scrollHeight - reelRef.clientHeight);
           // Offset by 40px for normal, 5px for compact (fine-tuned for center alignment)
           const offset = isCompactArg ? 5 : 40;
           const targetScroll = maxScroll - offset;
           const currentScroll = targetScroll * easeOutCubic;
+          if (isMobile) {
+            reelRef.scrollLeft = currentScroll;
+          } else {
           reelRef.scrollTop = currentScroll;
+          }
         }
       });
       if (progress < 1) {
@@ -447,7 +466,8 @@ const ReelSystem = memo(function ReelSystem({
   };
 
   return (
-    <div className="flex flex-col gap-4 mt-6">
+    <div className="flex flex-col gap-4 mt-6" style={isMobile ? { marginTop: 0 } : {}}>
+      {!isMobile ? (
       <div className="relative flex flex-row justify-center items-stretch w-full">
         {/* Center line indicator - spans across entire panel behind reels */}
         <div className="pointer-events-none absolute z-0 h-0.5 bg-muted-foreground/60 w-full" style={{ top: 'calc(50% + 3px)', left: 0, right: 0, transform: 'translateY(-50%)' }} />
@@ -467,6 +487,7 @@ const ReelSystem = memo(function ReelSystem({
             reelIndex={0}
             resolvedTheme={resolvedTheme}
             isCompact={isCompact}
+              isHorizontal={false}
             locked={locked[0]}
             categoryColor={categoryColor}
           />
@@ -514,6 +535,7 @@ const ReelSystem = memo(function ReelSystem({
                   reelIndex={i}
                   resolvedTheme={resolvedTheme}
                   isCompact={isCompact}
+                    isHorizontal={false}
                   locked={locked[i]}
                 />
                 <div className="flex flex-col items-center mt-2">
@@ -544,7 +566,74 @@ const ReelSystem = memo(function ReelSystem({
           })}
         </div>
       </div>
-      
+      ) : (
+        <div className="w-full" style={{ position: 'relative', maxWidth: 'calc(100vw - 16px)', margin: '0 auto' }}>
+          {/* Single vertical hit line behind all reels (mobile only) */}
+          <div
+            className="pointer-events-none absolute z-0"
+            style={{
+              top: 0,
+              bottom: -20,
+              left: `calc(100% - ${80 * 1.5}px)`,
+              width: '2px',
+              background: 'hsl(var(--primary) / 0.8)'
+            }}
+          />
+          <div className="flex flex-col gap-4 w-full relative z-10">
+            {[0,1,2,3].map(i => {
+            const band = bandNames[i];
+            const bandKey = band.toLowerCase() as keyof HotPocketData["breakfast"];
+            const bandData = categoryData![bandKey];
+            const selectedIdx = selectedIndices[i];
+            const isNone = band !== "Base" && bandData[selectedIdx]?.name === "None";
+            return (
+              <div key={band} className="w-full">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="font-bold text-left" style={{ fontSize: '.625rem', lineHeight: '.625rem' }}>{bandLabels[band]}</div>
+                  {i > 0 && (
+                    <TooltipProvider delayDuration={0}>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <div className="flex items-center gap-2">
+                            <Switch
+                              id={`lock-toggle-${i}`}
+                              checked={locked[i]}
+                              onCheckedChange={checked => setLocked(l => l.map((v, idx) => idx === i ? checked : v))}
+                              className="data-[state=checked]:bg-primary data-[state=unchecked]:bg-input border border-gray-300 dark:border-accent"
+                              disabled={lockTogglesDisabled}
+                            />
+                            <Label htmlFor={`lock-toggle-${i}`} className="text-[10px] font-medium select-none text-muted-foreground dark:text-gray-300 leading-3">
+                              locked on
+                            </Label>
+                          </div>
+                        </TooltipTrigger>
+                        <TooltipContent className="bg-black">
+                          <span>locked on reels increase their hit chances from ~20% to 100%</span>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  )}
+                </div>
+                <div>
+                  <Reel
+                    items={reelItemsList[i] as HitIngredient[]}
+                    selectedIdx={selectedIndices[i]}
+                    greyed={isNone}
+                    bandName={band}
+                    reelIndex={i}
+                    resolvedTheme={resolvedTheme}
+                    isCompact={true}
+                    isHorizontal={true}
+                    locked={locked[i]}
+                    categoryColor={i === 0 ? categoryColor : undefined}
+                  />
+                </div>
+              </div>
+            );
+          })}
+          </div>
+        </div>
+      )}
       <div className="flex gap-4 mt-2 justify-center">
         <Button
           className="bg-primary text-black hover:bg-primary/80 px-[22px] py-[18px]"
@@ -560,6 +649,7 @@ const ReelSystem = memo(function ReelSystem({
           Bake Another
         </Button>
       </div>
+      {isMobile && <div style={{ height: 20 }} />}
     </div>
   );
 }, (prevProps, nextProps) => {
@@ -582,6 +672,7 @@ const HotPocketGenerator: React.FC = () => {
   // Responsive: 991px and below
   const [isCompact, setIsCompact] = useState(false);
   const [isNarrow, setIsNarrow] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const [comboCount, setComboCount] = useState<number | null>(null);
   const [totalBakes, setTotalBakes] = useState<number | null>(null);
   // Add lock toggles state here
@@ -591,6 +682,7 @@ const HotPocketGenerator: React.FC = () => {
     const check = () => {
       setIsCompact(window.innerWidth <= 991);
       setIsNarrow(window.innerWidth < 1180);
+      setIsMobile(window.innerWidth <= 767);
     };
     check();
     window.addEventListener('resize', check);
@@ -734,10 +826,10 @@ const HotPocketGenerator: React.FC = () => {
         onClick={() => setShowResult(false)}
       >
         <div
-          className="fixed left-1/2 -translate-x-1/2 z-[10000] bg-background border rounded-2xl p-8 pt-8 text-center w-full pointer-events-auto overflow-y-auto"
+          className="fixed left-1/2 -translate-x-1/2 z-[10000] bg-background border rounded-2xl p-8 pt-8 text-center w-full pointer-events-auto overflow-y-auto overflow-x-hidden"
           style={window.innerWidth <= 991
-            ? { width: '100vw', maxWidth: '100vw', top: 0, opacity: visible ? 1 : 0, transform: visible ? 'translate(-50%, 0)' : 'translate(-50%, 80px)', transition: 'opacity 0.7s cubic-bezier(0.4,0,0.2,1), transform 0.7s cubic-bezier(0.4,0,0.2,1)', maxHeight: '100vh' }
-            : { maxWidth: '900px', top: 0, opacity: visible ? 1 : 0, transform: visible ? 'translate(-50%, 0)' : 'translate(-50%, 80px)', transition: 'opacity 0.7s cubic-bezier(0.4,0,0.2,1), transform 0.7s cubic-bezier(0.4,0,0.2,1)', maxHeight: '100vh' }
+            ? { width: '100vw', maxWidth: '100vw', top: 0, opacity: visible ? 1 : 0, transform: visible ? 'translate(-50%, 0)' : 'translate(-50%, 80px)', transition: 'opacity 0.7s cubic-bezier(0.4,0,0.2,1), transform 0.7s cubic-bezier(0.4,0,0.2,1)', maxHeight: '100vh', overflowX: 'hidden' }
+            : { maxWidth: '900px', top: 0, opacity: visible ? 1 : 0, transform: visible ? 'translate(-50%, 0)' : 'translate(-50%, 80px)', transition: 'opacity 0.7s cubic-bezier(0.4,0,0.2,1), transform 0.7s cubic-bezier(0.4,0,0.2,1)', maxHeight: '100vh', overflowX: 'hidden' }
           }
           onClick={e => e.stopPropagation()}
         >
@@ -763,9 +855,9 @@ const HotPocketGenerator: React.FC = () => {
               className="object-contain"
             />
           </div>
-          <h2 className="text-[29px] font-bold mb-1">Your Hot Pocket is ready!</h2>
+          <h2 className="font-bold mb-1" style={window.innerWidth <= 991 ? { fontSize: '22px', lineHeight: '26px' } : { fontSize: '29px', lineHeight: '33px' }}>Your Hot Pocket is ready!</h2>
           <div className="flex flex-col gap-6">
-            <div className="text-3xl font-bold mb-2">
+            <div className="font-bold mb-2" style={window.innerWidth <= 991 ? { fontSize: '1.5rem', lineHeight: '1.75rem' } : { fontSize: '1.875rem', lineHeight: '2.25rem' }}>
               <div>
                 <span className={isLightMode ? "text-black" : "text-white"}>It's {getResultText(hitItemsRef.current, seasoningStyleRef.current).parts.length > 0 && getResultText(hitItemsRef.current, seasoningStyleRef.current).parts[0].text.toLowerCase().match(/^[aeiou]/) ? 'an ' : 'a '}</span>
                 {getResultText(hitItemsRef.current, seasoningStyleRef.current).parts.map((part, index) => {
@@ -801,15 +893,21 @@ const HotPocketGenerator: React.FC = () => {
                 })()}
               </div>
             </div>
-            <div className="text-base text-primary" style={{ fontSize: '1.25rem' }}>
+          <div className="text-base text-primary" style={window.innerWidth <= 767 ? { fontSize: '0.9375rem' } : { fontSize: '1.25rem' }}>
               *{hitItemsRef.current[0]?.ingredientList?.map(ingredient => ingredient.toLowerCase()).join(", ")}
             </div>
             {/* Combo count message moved here, above the Bake Another button */}
             {comboCount !== null && (
               <div
                 className="mb-1"
-                style={{
-                  fontSize: '0.875rem', // 2px smaller than 1rem
+                style={window.innerWidth <= 767 ? {
+                  fontSize: '0.65625rem',
+                  fontWeight: 'normal',
+                  color: isLightMode ? 'black' : 'white',
+                  opacity: 0.65,
+                  transition: 'opacity 0.2s',
+                } : {
+                  fontSize: '0.875rem',
                   fontWeight: 'normal',
                   color: isLightMode ? 'black' : 'white',
                   opacity: 0.65,
@@ -855,14 +953,6 @@ const HotPocketGenerator: React.FC = () => {
   // SSR/hydration-safe: only hide after first client render
   const [mounted, setMounted] = useState(false);
   useEffect(() => { setMounted(true); }, []);
-  // Hide completely on 767px and below
-  const [isHidden, setIsHidden] = useState(false);
-  useEffect(() => {
-    const checkHidden = () => setIsHidden(window.innerWidth <= 767);
-    checkHidden();
-    window.addEventListener('resize', checkHidden);
-    return () => window.removeEventListener('resize', checkHidden);
-  }, []);
   // Tooltip click handler for non-patrons
   const handleDisabledClick = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
@@ -877,7 +967,7 @@ const HotPocketGenerator: React.FC = () => {
     document.addEventListener("click", handleDocumentClick);
     return () => document.removeEventListener("click", handleDocumentClick);
   }, [tooltipOpen]);
-  if (!mounted || isHidden) return null;
+  if (!mounted) return null;
   // Patron gating logic - controlled by global feature flag
   const hasAccess = !PATRON_PAYWALL_ENABLED || patronLevel > 0 || user?.isAdmin;
   return (
@@ -915,8 +1005,8 @@ const HotPocketGenerator: React.FC = () => {
               </TooltipContent>
             </Tooltip>
             <DialogContent
-              className="w-full max-h-[100vh] overflow-y-auto rounded-2xl p-2 xs:p-8 pt-8 pb-8 xs:pt-8 xs:pb-16 text-center"
-              style={isCompact ? { width: '100vw', maxWidth: '100vw' } : { maxWidth: '1200px' }}
+              className="w-full max-h-[100vh] overflow-y-auto overflow-x-hidden rounded-2xl p-2 xs:p-8 text-center"
+              style={isCompact ? { width: '100vw', maxWidth: '100vw', paddingTop: 8, paddingBottom: 8, overflowX: 'hidden' } : { maxWidth: '1200px', overflowX: 'hidden' }}
             >
               <style>{`
                 @keyframes pulse-grow {
@@ -928,15 +1018,16 @@ const HotPocketGenerator: React.FC = () => {
                   }
                 }
               `}</style>
-              <DialogTitle className="text-center relative inline-block" style={{ fontSize: '2.25rem', lineHeight: '2.5rem', fontWeight: 700 }}>
+              <DialogTitle className="text-center relative inline-block" style={isCompact ? { fontSize: '1.125rem', lineHeight: '1.25rem', fontWeight: 700, marginTop: 4, marginBottom: 8 } : { fontSize: '2.25rem', lineHeight: '2.5rem', fontWeight: 700 }}>
                 Hot Pocket Flave-O-Matic<sup>™</sup> <span style={{ fontSize: '50%', opacity: 0.5, verticalAlign: 'middle' }}>v1.1</span>
               </DialogTitle>
+              {!isCompact && (
               <span 
                 style={{ 
                   position: 'absolute',
                   left: '50%',
                   top: '17px',
-                  marginLeft: isCompact ? '110px' : '250px',
+                    marginLeft: '250px',
                   color: '#ebb433',
                   fontSize: '1rem',
                   fontWeight: 600,
@@ -949,7 +1040,9 @@ const HotPocketGenerator: React.FC = () => {
               >
                 now<br />coconut-free!
               </span>
+              )}
               {!selectedCategory ? (
+                !isMobile ? (
                 <div className="flex gap-5 mt-6 justify-center">
                   {categories.map((cat) => (
                     <Button
@@ -971,7 +1064,7 @@ const HotPocketGenerator: React.FC = () => {
                             alt="Breakfast" 
                             width={80} 
                             height={80} 
-                            className="object-cover"
+                            className="object-contain"
                           />
                         ) : cat.key === 'dinner' ? (
                           <Image 
@@ -979,7 +1072,7 @@ const HotPocketGenerator: React.FC = () => {
                             alt="Dinner" 
                             width={80} 
                             height={80} 
-                            className="object-cover"
+                            className="object-contain"
                           />
                         ) : cat.key === 'dessert' ? (
                           <Image 
@@ -987,7 +1080,7 @@ const HotPocketGenerator: React.FC = () => {
                             alt="Dessert" 
                             width={80} 
                             height={80} 
-                            className="object-cover"
+                            className="object-contain"
                           />
                         ) : (
                           <span className="text-2xl">🍽️</span>
@@ -998,6 +1091,38 @@ const HotPocketGenerator: React.FC = () => {
                   ))}
                 </div>
               ) : (
+                  <div className="flex flex-col gap-3 mt-4">
+                    {categories.map((cat) => (
+                      <Button
+                        key={cat.key}
+                        className={`rounded-xl flex flex-col items-center justify-center gap-3 transition-all duration-200 ${
+                          cat.key === 'breakfast' 
+                            ? 'bg-[#d5693f] text-white hover:bg-[#d5693f]/80' 
+                            : cat.key === 'dinner'
+                            ? 'bg-[#b92638] text-white hover:bg-[#b92638]/80'
+                            : 'bg-[#6a3253] text-white hover:bg-[#6a3253]/80'
+                        }`}
+                        style={{ width: '100%', paddingTop: 56, paddingBottom: 56, paddingLeft: 16, paddingRight: 16 }}
+                        onClick={() => handleCategorySelect(cat.key)}
+                      >
+                  <div className="rounded-lg flex items-center justify-center" style={{ width: '48px', height: '48px' }}>
+                          {cat.key === 'breakfast' ? (
+                      <Image src="/breakfast.png" alt="Breakfast" width={48} height={48} className="object-contain !block" />
+                          ) : cat.key === 'dinner' ? (
+                      <Image src="/dinner.png" alt="Dinner" width={48} height={48} className="object-contain !block" />
+                          ) : cat.key === 'dessert' ? (
+                      <Image src="/dessert.png" alt="Dessert" width={48} height={48} className="object-contain !block" />
+                          ) : (
+                            <span className="text-xl">🍽️</span>
+                          )}
+                        </div>
+                        <span className="font-bold text-base">{cat.label}</span>
+                      </Button>
+                    ))}
+                  </div>
+                )
+              ) : (
+                (!isMobile ? (
                 <ReelSystem 
                   categoryData={categoryData} 
                   onBakeClick={handleBakeClick}
@@ -1005,11 +1130,27 @@ const HotPocketGenerator: React.FC = () => {
                   onBakeStart={handleBakeStart}
                   resolvedTheme={resolvedTheme}
                   isCompact={isCompact}
+                    isMobile={false}
                   lockTogglesDisabled={lockTogglesDisabled}
                   locked={locked}
                   setLocked={setLocked}
                   categoryColor={getCategoryColor(selectedCategory)}
                 />
+                ) : (
+                  <ReelSystem 
+                    categoryData={categoryData} 
+                    onBakeClick={handleBakeClick}
+                    onNext={handleNext}
+                    onBakeStart={handleBakeStart}
+                    resolvedTheme={resolvedTheme}
+                    isCompact={true}
+                    isMobile={true}
+                    lockTogglesDisabled={lockTogglesDisabled}
+                    locked={locked}
+                    setLocked={setLocked}
+                    categoryColor={getCategoryColor(selectedCategory)}
+                  />
+                ))
               )}
             </DialogContent>
           </Dialog>
